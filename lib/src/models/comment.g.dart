@@ -8,15 +8,12 @@ part of 'comment.dart';
 
 Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
       id: json['id'] as String,
-      feedbackId: json['feedbackId'] as String,
       content: json['content'] as String,
       author: Author.fromJson(json['author'] as Map<String, dynamic>),
       parentId: json['parentId'] as String?,
       isPinned: json['isPinned'] as bool? ?? false,
       replyCount: (json['replyCount'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      status: json['status'] as String,
       clientInfo: json['clientInfo'] == null
           ? null
           : ClientInfo.fromJson(json['clientInfo'] as Map<String, dynamic>),
@@ -30,15 +27,12 @@ Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
 
 Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
       'id': instance.id,
-      'feedbackId': instance.feedbackId,
       'content': instance.content,
       'author': instance.author,
       'parentId': instance.parentId,
       'isPinned': instance.isPinned,
       'replyCount': instance.replyCount,
       'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
-      'status': instance.status,
       'clientInfo': instance.clientInfo,
       'mark': instance.mark,
       'attachments': instance.attachments,

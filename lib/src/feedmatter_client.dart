@@ -113,14 +113,30 @@ class FeedMatterClient {
     _dio.options.headers.remove('X-User-Avatar');
   }
 
+  String _getAppType(){
+    if(Platform.isAndroid){
+      return 'ANDROID';
+    }else if(Platform.isIOS){
+      return 'IOS';
+    } else if (Platform.isWindows) {
+      return 'WINDOWS';
+    } else if (Platform.isLinux) {
+      return 'LINUX';
+    } else if (Platform.isMacOS) {
+      return 'MAC';
+    } else {
+      return 'UNKNOWN';
+    }
+  }
+
   /// 获取设备和应用信息
   Future<Map<String, dynamic>> _getClientInfo() async {
     final packageInfo = await PackageInfo.fromPlatform();
-
     final Map<String, dynamic> info = {
       'appVersionCode': int.tryParse(packageInfo.buildNumber) ?? 0,
       'appVersionName': packageInfo.version,
-      'packageName': packageInfo.packageName,
+      'appPackage': packageInfo.packageName,
+      'appType': _getAppType(),
     };
 
     if (config?.debug ?? false) {
