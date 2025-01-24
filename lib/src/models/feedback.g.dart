@@ -14,13 +14,14 @@ Feedback _$FeedbackFromJson(Map<String, dynamic> json) => Feedback(
       attachments: (json['attachments'] as List<dynamic>?)
           ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
           .toList(),
-      isPinned: json['isPinned'] as bool,
-      commentCount: (json['commentCount'] as num).toInt(),
-      readCount: (json['readCount'] as num).toInt(),
+      isPinned: json['isPinned'] as bool? ?? false,
+      commentCount: (json['commentCount'] as num?)?.toInt() ?? 0,
+      readCount: (json['readCount'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
-      clientInfo: json['clientInfo'] as Map<String, dynamic>?,
-      customInfo: json['customInfo'] as Map<String, dynamic>?,
+      clientInfo: json['clientInfo'] == null
+          ? null
+          : ClientInfo.fromJson(json['clientInfo'] as Map<String, dynamic>),
       mark: json['mark'] == null
           ? null
           : FeedbackMark.fromJson(json['mark'] as Map<String, dynamic>),
@@ -38,6 +39,5 @@ Map<String, dynamic> _$FeedbackToJson(Feedback instance) => <String, dynamic>{
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
       'clientInfo': instance.clientInfo,
-      'customInfo': instance.customInfo,
       'mark': instance.mark,
     };

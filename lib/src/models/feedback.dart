@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'author.dart';
 import 'attachment.dart';
 import 'feedback_mark.dart';
+import 'client_info.dart';
 
 part 'feedback.g.dart';
 
@@ -12,13 +13,15 @@ class Feedback {
   final String status;
   final Author author;
   final List<Attachment>? attachments;
+  @JsonKey(defaultValue: false)
   final bool isPinned;
+  @JsonKey(defaultValue: 0)
   final int commentCount;
+  @JsonKey(defaultValue: 0)
   final int readCount;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final Map<String, dynamic>? clientInfo;
-  final Map<String, dynamic>? customInfo;
+  final ClientInfo? clientInfo;
   final FeedbackMark? mark;
 
   const Feedback({
@@ -27,13 +30,12 @@ class Feedback {
     required this.status,
     required this.author,
     this.attachments,
-    required this.isPinned,
-    required this.commentCount,
-    required this.readCount,
+    this.isPinned = false,
+    this.commentCount = 0,
+    this.readCount = 0,
     required this.createdAt,
     required this.updatedAt,
     this.clientInfo,
-    this.customInfo,
     this.mark,
   });
 

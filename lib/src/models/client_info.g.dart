@@ -1,0 +1,22 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'client_info.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+ClientInfo _$ClientInfoFromJson(Map<String, dynamic> json) => ClientInfo(
+      appVersionCode: (json['appVersionCode'] as num).toInt(),
+      appVersionName: json['appVersionName'] as String,
+      appPackage: json['appPackage'] as String,
+      appType: json['appType'] as String,
+    );
+
+Map<String, dynamic> _$ClientInfoToJson(ClientInfo instance) =>
+    <String, dynamic>{
+      'appVersionCode': instance.appVersionCode,
+      'appVersionName': instance.appVersionName,
+      'appPackage': instance.appPackage,
+      'appType': instance.appType,
+    };

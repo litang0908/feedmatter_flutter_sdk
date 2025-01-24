@@ -164,11 +164,9 @@ class FeedMatterClient {
   }) async {
     final Map<String, dynamic> data = {
       'content': content,
+      'clientInfo': await _getClientInfo(),
       if (customInfo != null) 'customInfo': customInfo,
     };
-
-    // 添加设备信息
-    data['clientInfo'] = await _getClientInfo();
 
     return _handleResponse(() => _dio.post(
       '/api/v1/feedback',
@@ -211,9 +209,14 @@ class FeedMatterClient {
   }
 
   Future<Comment> createComment(String feedbackId, String content) async {
+    final Map<String, dynamic> data = {
+      'content': content,
+      'clientInfo': await _getClientInfo(),
+    };
+
     return _handleResponse(() => _dio.post(
       '/api/v1/feedback/$feedbackId/comments',
-      data: {'content': content},
+      data: data,
     )).then((json) => Comment.fromJson(json));
   }
 

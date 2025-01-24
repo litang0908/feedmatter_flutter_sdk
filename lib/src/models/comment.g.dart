@@ -8,26 +8,29 @@ part of 'comment.dart';
 
 Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
       id: json['id'] as String,
+      feedbackId: json['feedbackId'] as String,
       content: json['content'] as String,
       author: Author.fromJson(json['author'] as Map<String, dynamic>),
       parentId: json['parentId'] as String?,
-      isPinned: json['isPinned'] as bool,
-      replyCount: (json['replyCount'] as num).toInt(),
+      isPinned: json['isPinned'] as bool? ?? false,
+      replyCount: (json['replyCount'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       status: json['status'] as String,
+      clientInfo: json['clientInfo'] == null
+          ? null
+          : ClientInfo.fromJson(json['clientInfo'] as Map<String, dynamic>),
       mark: json['mark'] == null
           ? null
           : CommentMark.fromJson(json['mark'] as Map<String, dynamic>),
-      attachments: json['attachments'] != null
-          ? (json['attachments'] as List<dynamic>)
-              .map((e) => Attachment.fromJson(e as Map<String, dynamic>))
-              .toList()
-          : null,
+      attachments: (json['attachments'] as List<dynamic>?)
+          ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
       'id': instance.id,
+      'feedbackId': instance.feedbackId,
       'content': instance.content,
       'author': instance.author,
       'parentId': instance.parentId,
@@ -36,6 +39,7 @@ Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
       'status': instance.status,
-      'mark': instance.mark, 
-      'attachments': instance.attachments?.map((e) => e.toJson()).toList(),
+      'clientInfo': instance.clientInfo,
+      'mark': instance.mark,
+      'attachments': instance.attachments,
     };
