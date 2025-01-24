@@ -3,6 +3,7 @@ import 'author.dart';
 import 'attachment.dart';
 import 'feedback_mark.dart';
 import 'client_info.dart';
+import '../enums/feedback_status.dart';
 
 part 'feedback.g.dart';
 
@@ -10,7 +11,7 @@ part 'feedback.g.dart';
 class Feedback {
   final String id;
   final String content;
-  final String status;
+  final FeedbackStatus status;
   final Author author;
   final List<Attachment>? attachments;
   @JsonKey(defaultValue: false)

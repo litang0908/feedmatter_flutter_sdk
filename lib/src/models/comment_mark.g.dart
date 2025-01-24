@@ -7,8 +7,8 @@ part of 'comment_mark.dart';
 // **************************************************************************
 
 CommentMark _$CommentMarkFromJson(Map<String, dynamic> json) => CommentMark(
-      isAdmin: json['isAdmin'] as bool?,
-      isAdminReply: json['isAdminReply'] as bool?,
+      isAdmin: (json['isAdmin'] as num?)?.toInt(),
+      isAdminReply: (json['isAdminReply'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$CommentMarkToJson(CommentMark instance) =>

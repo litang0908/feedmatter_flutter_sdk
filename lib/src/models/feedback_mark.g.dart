@@ -7,8 +7,8 @@ part of 'feedback_mark.dart';
 // **************************************************************************
 
 FeedbackMark _$FeedbackMarkFromJson(Map<String, dynamic> json) => FeedbackMark(
-      isAdmin: json['isAdmin'] as bool?,
-      isAdminReply: json['isAdminReply'] as bool?,
+      isAdmin: (json['isAdmin'] as num?)?.toInt(),
+      isAdminReply: (json['isAdminReply'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$FeedbackMarkToJson(FeedbackMark instance) =>

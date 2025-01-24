@@ -9,7 +9,7 @@ part of 'feedback.dart';
 Feedback _$FeedbackFromJson(Map<String, dynamic> json) => Feedback(
       id: json['id'] as String,
       content: json['content'] as String,
-      status: json['status'] as String,
+      status: $enumDecode(_$FeedbackStatusEnumMap, json['status']),
       author: Author.fromJson(json['author'] as Map<String, dynamic>),
       attachments: (json['attachments'] as List<dynamic>?)
           ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
@@ -30,7 +30,7 @@ Feedback _$FeedbackFromJson(Map<String, dynamic> json) => Feedback(
 Map<String, dynamic> _$FeedbackToJson(Feedback instance) => <String, dynamic>{
       'id': instance.id,
       'content': instance.content,
-      'status': instance.status,
+      'status': _$FeedbackStatusEnumMap[instance.status]!,
       'author': instance.author,
       'attachments': instance.attachments,
       'isPinned': instance.isPinned,
@@ -41,3 +41,13 @@ Map<String, dynamic> _$FeedbackToJson(Feedback instance) => <String, dynamic>{
       'clientInfo': instance.clientInfo,
       'mark': instance.mark,
     };
+
+const _$FeedbackStatusEnumMap = {
+  FeedbackStatus.pending: 'PENDING',
+  FeedbackStatus.open: 'OPEN',
+  FeedbackStatus.inProgress: 'IN_PROGRESS',
+  FeedbackStatus.resolved: 'RESOLVED',
+  FeedbackStatus.closed: 'CLOSED',
+  FeedbackStatus.hidden: 'HIDDEN',
+  FeedbackStatus.deleted: 'DELETED',
+};
