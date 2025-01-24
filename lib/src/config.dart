@@ -18,3 +18,15 @@ class FeedMatterConfig {
     this.timeout = 30,
   });
 }
+
+class FeedMatterUser {
+  final String userId;
+  final String userName;
+  final String? userAvatar;
+
+  FeedMatterUser({
+    required this.userId,
+    required this.userName,
+    this.userAvatar,
+  });
+}

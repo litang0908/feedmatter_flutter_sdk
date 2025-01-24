@@ -38,17 +38,25 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     // 初始化 SDK
-    client = feedmatter.FeedMatterClient(const feedmatter.FeedMatterConfig(
-      baseUrl: 'https://fmapi.feedmatter.com',
-      apiKey: 'your-api-key',
-      debug: true,
-    ));
-
-    // 设置用户信息
-    client.setUser(
-      userId: 'test-user-id',
-      username: 'Test User',
-      avatar: 'https://example.com/avatar.png',
+    client = feedmatter.FeedMatterClient.instance;
+    client.init(
+      feedmatter.FeedMatterConfig(
+        baseUrl: 'https://fmapi.feedmatter.com',
+        apiKey: 'your-api-key',
+        timeout: 30,
+        debug: true,
+      ),
+      feedmatter.FeedMatterUser(
+        userId: 'test-user-id',
+        userName: 'Test User',
+        userAvatar: 'https://example.com/avatar.png',
+      ),
+      onError: (error) {
+        // 全局错误处理
+        if (mounted) {
+          _showError(error.toString());
+        }
+      },
     );
 
     // 加载反馈列表
@@ -56,20 +64,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _loadFeedbacks() async {
+    setState(() => _isLoading = true);
     try {
       // 获取所有反馈
       final feedbacks = await client.getFeedbacks();
-      print('All feedbacks: $feedbacks');
-
-      // 获取用户自己的反馈
-      final myFeedbacks = await client.getMyFeedbacks();
-      print('My feedbacks: $myFeedbacks');
-
-      setState(() {
-        _feedbacks = feedbacks;
-      });
-    } catch (e) {
-      print('Error loading feedbacks: $e');
+      if (mounted) {
+        setState(() {
+          _feedbacks = feedbacks;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -81,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() => _isLoading = true);
     try {
-      await client.submitFeedback(
+      await client.createFeedback(
         _feedbackController.text,
         customInfo: {'source': 'example_app'},
       );
@@ -92,10 +99,10 @@ class _MyHomePageState extends State<MyHomePage> {
           const SnackBar(content: Text('反馈提交成功')),
         );
       }
-    } catch (e) {
-      _showError('提交反馈失败: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -107,6 +114,10 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.red,
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -165,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           subtitle: Text(
                             '状态: ${feedback.status} · ${feedback.commentCount} 条评论',
                           ),
-                          trailing: Text(feedback.createdAt),
+                          trailing: Text(_formatDate(feedback.createdAt)),
                         ),
                       );
                     },
