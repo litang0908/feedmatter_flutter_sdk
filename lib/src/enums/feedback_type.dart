@@ -1,4 +1,6 @@
+import 'package:json_annotation/json_annotation.dart';
 /// 反馈类型
+@JsonEnum(valueField: 'value')
 enum FeedbackType {
   /// 建议
   advice('ADVICE'),

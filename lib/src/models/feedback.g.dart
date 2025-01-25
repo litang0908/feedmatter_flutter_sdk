@@ -59,10 +59,10 @@ const _$FeedbackStatusEnumMap = {
 };
 
 const _$FeedbackTypeEnumMap = {
-  FeedbackType.advice: 'advice',
-  FeedbackType.error: 'error',
-  FeedbackType.ask: 'ask',
-  FeedbackType.help: 'help',
-  FeedbackType.notice: 'notice',
-  FeedbackType.other: 'other',
+  FeedbackType.advice: 'ADVICE',
+  FeedbackType.error: 'ERROR',
+  FeedbackType.ask: 'ASK',
+  FeedbackType.help: 'HELP',
+  FeedbackType.notice: 'NOTICE',
+  FeedbackType.other: 'OTHER',
 };
