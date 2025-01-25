@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'exceptions/feedmatter_exception.dart';
+
 import 'config.dart';
+import 'exceptions/feedmatter_exception.dart';
 import 'models/comment.dart';
 import 'models/feedback.dart';
 
@@ -113,10 +114,10 @@ class FeedMatterClient {
     _dio.options.headers.remove('X-User-Avatar');
   }
 
-  String _getAppType(){
-    if(Platform.isAndroid){
+  String _getAppType() {
+    if (Platform.isAndroid) {
       return 'ANDROID';
-    }else if(Platform.isIOS){
+    } else if (Platform.isIOS) {
       return 'IOS';
     } else if (Platform.isWindows) {
       return 'WINDOWS';
@@ -175,7 +176,8 @@ class FeedMatterClient {
     }
   }
 
-  Future<Feedback> createFeedback(String content, {
+  Future<Feedback> createFeedback(
+    String content, {
     Map<String, dynamic>? customInfo,
   }) async {
     final Map<String, dynamic> data = {
@@ -185,34 +187,44 @@ class FeedMatterClient {
     };
 
     return _handleResponse(() => _dio.post(
-      '/api/v1/feedback',
-      data: data,
-    )).then((json) => Feedback.fromJson(json));
+          '/api/v1/feedback',
+          data: data,
+        )).then((json) => Feedback.fromJson(json));
   }
 
-  Future<List<Feedback>> getFeedbacks({int page = 0, int size = 20}) async {
+  Future<List<Feedback>> getFeedbacks({
+    int page = 0,
+    int size = 20,
+    String? keyword,
+  }) async {
     final response = await _handleResponse(() => _dio.get(
-      '/api/v1/feedback',
-      queryParameters: {
-        'page': page,
-        'size': size,
-      },
-    ));
-    
+          '/api/v1/feedback',
+          queryParameters: {
+            'page': page,
+            'size': size,
+            if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
+          },
+        ));
+
     return (response['content'] as List)
         .map((item) => Feedback.fromJson(item))
         .toList();
   }
 
-  Future<List<Feedback>> getMyFeedbacks({int page = 0, int size = 20}) async {
+  Future<List<Feedback>> getMyFeedbacks({
+    int page = 0,
+    int size = 20,
+    String? keyword,
+  }) async {
     final response = await _handleResponse(() => _dio.get(
-      '/api/v1/feedback/my',
-      queryParameters: {
-        'page': page,
-        'size': size,
-      },
-    ));
-    
+          '/api/v1/feedback/my',
+          queryParameters: {
+            'page': page,
+            'size': size,
+            if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
+          },
+        ));
+
     return (response['content'] as List)
         .map((item) => Feedback.fromJson(item))
         .toList();
@@ -220,31 +232,44 @@ class FeedMatterClient {
 
   Future<Feedback> getFeedback(String id) async {
     return _handleResponse(() => _dio.get(
-      '/api/v1/feedback/$id',
-    )).then((json) => Feedback.fromJson(json));
+          '/api/v1/feedback/$id',
+        )).then((json) => Feedback.fromJson(json));
   }
 
-  Future<Comment> createComment(String feedbackId, String content) async {
+  Future<Comment> createComment(
+    String feedbackId,
+    String content, {
+    String? parentCommentId,
+  }) async {
     final Map<String, dynamic> data = {
       'content': content,
       'clientInfo': await _getClientInfo(),
     };
+    if (parentCommentId?.isNotEmpty ?? false) {
+      data['parentId'] = parentCommentId!;
+    }
 
     return _handleResponse(() => _dio.post(
-      '/api/v1/feedback/$feedbackId/comments',
-      data: data,
-    )).then((json) => Comment.fromJson(json));
+          '/api/v1/feedback/$feedbackId/comments',
+          data: data,
+        )).then((json) => Comment.fromJson(json));
   }
 
-  Future<List<Comment>> getComments(String feedbackId, {int page = 0, int size = 20}) async {
+  Future<List<Comment>> getComments(
+    String feedbackId, {
+    int page = 0,
+    int size = 20,
+    String? sortBy,
+  }) async {
     final response = await _handleResponse(() => _dio.get(
-      '/api/v1/feedback/$feedbackId/comments',
-      queryParameters: {
-        'page': page,
-        'size': size,
-      },
-    ));
-    
+          '/api/v1/feedback/$feedbackId/comments',
+          queryParameters: {
+            'page': page,
+            'size': size,
+            if (sortBy != null) 'sort': sortBy,
+          },
+        ));
+
     return (response['content'] as List)
         .map((item) => Comment.fromJson(item))
         .toList();
@@ -274,15 +299,17 @@ class FeedMatterClient {
   /// 获取安全的文件名
   String _getSafeFileName(String fileName) {
     // 移除路径分隔符和特殊字符
-    final name = fileName.split(Platform.pathSeparator).last
+    final name = fileName
+        .split(Platform.pathSeparator)
+        .last
         .replaceAll(RegExp(r'[^\w\s\-\.]'), '');
-    
+
     // 如果文件名为空，生成随机文件名
     if (name.isEmpty) {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       return 'file_$timestamp';
     }
-    
+
     return name;
   }
 
@@ -299,9 +326,9 @@ class FeedMatterClient {
     });
 
     final response = await _handleResponse(() => _dio.post(
-      '/api/upload/public',
-      data: formData,
-    ));
+          '/api/upload/public',
+          data: formData,
+        ));
 
     return response['url'];
   }
@@ -319,9 +346,9 @@ class FeedMatterClient {
     });
 
     final response = await _handleResponse(() => _dio.post(
-      '/api/upload/private',
-      data: formData,
-    ));
+          '/api/upload/private',
+          data: formData,
+        ));
 
     return response['key'];
   }
@@ -329,8 +356,8 @@ class FeedMatterClient {
   /// 获取私密文件的签名URL
   Future<String> getSignedUrl(String key) async {
     final response = await _handleResponse(() => _dio.get(
-      '/api/upload/private/$key',
-    ));
+          '/api/upload/private/$key',
+        ));
     return response['url'];
   }
 }

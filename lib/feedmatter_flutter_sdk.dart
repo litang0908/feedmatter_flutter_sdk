@@ -7,3 +7,5 @@ export 'src/config.dart';
 export 'src/models/author.dart';
 export 'src/enums/feedback_status.dart';
 export 'src/models/client_info.dart';
+export 'src/exceptions/feedmatter_exception.dart';
+export 'src/constants.dart';
