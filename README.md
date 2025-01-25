@@ -15,6 +15,15 @@ and the Flutter guide for
 
 FeedMatter Flutter SDK 是一个用于快速集成用户反馈功能的工具包。它提供了一套简单易用的 API，帮助开发者在 Flutter 应用中实现反馈收集、评论互动等功能。
 
+## 特性
+
+- 反馈管理：创建、查询、评论
+- 多种反馈类型：建议、错误报告、咨询、求助等
+- 自动收集设备信息
+- 文件上传：支持公开和私密两种模式
+- 评论互动：支持多级评论
+- 完整的错误处理机制
+
 ## 安装
 
 将以下依赖添加到你的 `pubspec.yaml` 文件中：
@@ -67,9 +76,10 @@ client.init(
 ```dart
 try {
   final feedback = await client.createFeedback(
-    '这是一条反馈内容',
+    content: '这是一条反馈内容',
+    type: FeedbackType.advice,    // 反馈类型（可选）
     customInfo: {
-      'source': 'home_page',  // 自定义信息（可选）
+      'source': 'home_page',      // 自定义信息（可选）
     },
   );
   print('反馈已提交: ${feedback.id}');
@@ -78,7 +88,46 @@ try {
 }
 ```
 
-### 3. 获取反馈列表
+### 3. 反馈类型
+
+SDK 支持以下反馈类型：
+
+```dart
+enum FeedbackType {
+  advice,    // 建议
+  error,     // 错误
+  ask,       // 咨询
+  help,      // 紧急求助
+  notice,    // 公告（仅管理员可用）
+  other      // 其他
+}
+```
+
+注意：
+- `notice` 类型仅限管理员使用
+- 如果不指定类型，默认为 `other`
+- 普通用户使用 `notice` 类型会收到错误响应
+
+### 4. 设备信息
+
+SDK 会自动收集以下设备信息：
+
+```dart
+class ClientInfo {
+  String appVersionName;      // 应用版本名
+  int appVersionCode;        // 应用版本号
+  String appPackage;         // 应用包名
+  String appType;           // 应用类型（ANDROID/IOS/MAC等）
+  String? deviceModel;      // 设备型号
+  String? deviceBrand;      // 设备品牌
+  String? deviceSysVersion; // 系统版本名称
+  String? deviceSysVersionInt; // 系统版本号
+}
+```
+
+这些信息会在提交反馈时自动附加，你不需要手动设置。
+
+### 5. 获取反馈列表
 
 ```dart
 // 获取所有反馈
@@ -94,7 +143,7 @@ final myFeedbacks = await client.getMyFeedbacks(
 );
 ```
 
-### 4. 评论功能
+### 6. 评论功能
 
 ```dart
 // 添加评论
@@ -153,26 +202,6 @@ try {
 }
 ```
 
-### 文件上传注意事项
-
-1. 文件大小限制
-   - 默认限制为 10MB
-   - 超过限制会抛出 `FILE_TOO_LARGE` 错误
-
-2. 文件名处理
-   - SDK 会自动处理文件名，移除特殊字符
-   - 如果处理后文件名为空，会生成带时间戳的随机文件名
-
-3. 错误处理
-   - `FILE_TOO_LARGE`: 文件超过大小限制
-   - `FILE_NOT_FOUND`: 文件不存在
-   - `NETWORK_ERROR`: 网络请求失败
-
-4. 安全建议
-   - 私密文件建议使用 `uploadPrivateFile`
-   - 及时处理过期的签名 URL
-   - 不要在客户端保存私密文件的 key
-
 ## 错误处理
 
 SDK 定义了以下几种异常类型：
@@ -210,7 +239,7 @@ client.init(
 2. 局部错误处理：
 ```dart
 try {
-  await client.createFeedback('反馈内容');
+  await client.createFeedback(content: '反馈内容');
 } on FeedMatterAuthException catch (e) {
   // 处理认证错误
 } on FeedMatterApiException catch (e) {
@@ -237,6 +266,16 @@ try {
    - 开发时开启 debug 模式查看详细日志
    - 生产环境建议关闭 debug 模式
 
+5. 设备信息
+   - SDK 会自动收集设备信息
+   - 无需手动设置设备信息
+   - 设备信息字段为空时不会占用存储空间
+
+6. 反馈类型
+   - 根据实际场景选择合适的反馈类型
+   - 避免使用 `notice` 类型（除非是管理员）
+   - 不确定类型时使用 `other`
+
 ## API 参考
 
 ### FeedMatterConfig
@@ -255,6 +294,19 @@ try {
 | userId | String | 是 | 用户唯一标识 |
 | userName | String | 是 | 用户名称 |
 | userAvatar | String | 否 | 用户头像 URL |
+
+### ClientInfo
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| appVersionName | String | 是 | 应用版本名 |
+| appVersionCode | int | 是 | 应用版本号 |
+| appPackage | String | 是 | 应用包名 |
+| appType | String | 是 | 应用类型 |
+| deviceModel | String | 否 | 设备型号 |
+| deviceBrand | String | 否 | 设备品牌 |
+| deviceSysVersion | String | 否 | 系统版本名称 |
+| deviceSysVersionInt | String | 否 | 系统版本号 |
 
 ## 数据模型
 
