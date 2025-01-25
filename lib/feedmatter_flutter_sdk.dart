@@ -9,3 +9,6 @@ export 'src/enums/feedback_status.dart';
 export 'src/models/client_info.dart';
 export 'src/exceptions/feedmatter_exception.dart';
 export 'src/constants.dart';
+export 'src/models/attachment.dart';
+export 'src/models/feedback_mark.dart';
+export 'src/enums/feedback_type.dart';

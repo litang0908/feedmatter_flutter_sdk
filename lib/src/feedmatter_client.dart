@@ -1,13 +1,19 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'config.dart';
+import 'enums/feedback_type.dart';
 import 'exceptions/feedmatter_exception.dart';
+import 'models/attachment.dart';
+import 'models/client_info.dart';
 import 'models/comment.dart';
 import 'models/feedback.dart';
 
+/// FeedMatter SDK 客户端
 class FeedMatterClient {
   FeedMatterConfig? config;
   FeedMatterUser? _user;
@@ -114,37 +120,49 @@ class FeedMatterClient {
     _dio.options.headers.remove('X-User-Avatar');
   }
 
-  String _getAppType() {
-    if (Platform.isAndroid) {
-      return 'ANDROID';
-    } else if (Platform.isIOS) {
-      return 'IOS';
-    } else if (Platform.isWindows) {
-      return 'WINDOWS';
-    } else if (Platform.isLinux) {
-      return 'LINUX';
-    } else if (Platform.isMacOS) {
-      return 'MAC';
-    } else {
-      return 'UNKNOWN';
-    }
-  }
+  String _getAppType() => Platform.operatingSystem.toUpperCase();
 
   /// 获取设备和应用信息
-  Future<Map<String, dynamic>> _getClientInfo() async {
+  Future<ClientInfo> _getClientInfo() async {
     final packageInfo = await PackageInfo.fromPlatform();
-    final Map<String, dynamic> info = {
-      'appVersionCode': int.tryParse(packageInfo.buildNumber) ?? 0,
-      'appVersionName': packageInfo.version,
-      'appPackage': packageInfo.packageName,
-      'appType': _getAppType(),
-    };
+    final deviceInfoPlugin = DeviceInfoPlugin();
 
-    if (config?.debug ?? false) {
-      print('Client info: $info');
+    String? deviceModel;
+    String? deviceBrand;
+    String? deviceSysVersion; //版本名称
+    String? deviceSysVersionInt; //版本号
+
+    // 获取设备信息
+    if (Platform.isIOS) {
+      final iosInfo = await deviceInfoPlugin.iosInfo;
+      deviceModel = iosInfo.model;
+      deviceBrand = iosInfo.name;
+      deviceSysVersion = iosInfo.systemName;
+      deviceSysVersionInt = iosInfo.systemVersion;
+    } else if (Platform.isAndroid) {
+      final androidInfo = await deviceInfoPlugin.androidInfo;
+      deviceModel = androidInfo.model;
+      deviceBrand = androidInfo.brand;
+      deviceSysVersion = androidInfo.version.release;
+      deviceSysVersionInt = androidInfo.version.sdkInt.toString();
+    } else if (Platform.isMacOS) {
+      final macOsInfo = await deviceInfoPlugin.macOsInfo;
+      deviceModel = macOsInfo.model;
+      deviceBrand = 'Apple';
+      deviceSysVersion = macOsInfo.osRelease;
+      deviceSysVersionInt = macOsInfo.majorVersion.toString();
     }
 
-    return info;
+    return ClientInfo(
+      appVersionCode: int.tryParse(packageInfo.buildNumber) ?? 0,
+      appVersionName: packageInfo.version,
+      appPackage: packageInfo.packageName,
+      appType: _getAppType(),
+      deviceModel: deviceModel,
+      deviceBrand: deviceBrand,
+      deviceSysVersion: deviceSysVersion,
+      deviceSysVersionInt: deviceSysVersionInt,
+    );
   }
 
   Map<String, String> get _headers {
@@ -176,20 +194,27 @@ class FeedMatterClient {
     }
   }
 
-  Future<Feedback> createFeedback(
-    String content, {
+  /// 创建反馈
+  Future<Feedback> createFeedback({
+    required String content,
+    FeedbackType? type,
+    ClientInfo? clientInfo,
     Map<String, dynamic>? customInfo,
+    List<Attachment>? attachments,
   }) async {
-    final Map<String, dynamic> data = {
-      'content': content,
-      'clientInfo': await _getClientInfo(),
-      if (customInfo != null) 'customInfo': customInfo,
-    };
+    final response = await _dio.post(
+      '/feedback',
+      data: {
+        'content': content,
+        if (type != null) 'type': type.value,
+        if (clientInfo != null) 'clientInfo': clientInfo.toJson(),
+        if (customInfo != null) 'customInfo': customInfo,
+        if (attachments != null && attachments.isNotEmpty)
+          'attachments': attachments.map((a) => a.toJson()).toList(),
+      },
+    );
 
-    return _handleResponse(() => _dio.post(
-          '/api/v1/feedback',
-          data: data,
-        )).then((json) => Feedback.fromJson(json));
+    return Feedback.fromJson(response.data);
   }
 
   Future<List<Feedback>> getFeedbacks({
@@ -243,7 +268,7 @@ class FeedMatterClient {
   }) async {
     final Map<String, dynamic> data = {
       'content': content,
-      'clientInfo': await _getClientInfo(),
+      'clientInfo': (await _getClientInfo()).toJson(),
     };
     if (parentCommentId?.isNotEmpty ?? false) {
       data['parentId'] = parentCommentId!;

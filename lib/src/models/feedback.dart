@@ -4,6 +4,7 @@ import 'attachment.dart';
 import 'feedback_mark.dart';
 import 'client_info.dart';
 import '../enums/feedback_status.dart';
+import '../enums/feedback_type.dart';
 
 part 'feedback.g.dart';
 
@@ -11,33 +12,39 @@ part 'feedback.g.dart';
 class Feedback {
   final String id;
   final String content;
+  @JsonKey(unknownEnumValue: FeedbackStatus.pending)
   final FeedbackStatus status;
+  @JsonKey(unknownEnumValue: FeedbackType.other)
+  final FeedbackType? type;
   final Author author;
-  final List<Attachment>? attachments;
-  @JsonKey(defaultValue: false)
-  final bool isPinned;
-  @JsonKey(defaultValue: 0)
-  final int commentCount;
+  @JsonKey(name: 'isPinned', defaultValue: false)
+  final bool pinned;
   @JsonKey(defaultValue: 0)
   final int readCount;
+  @JsonKey(defaultValue: 0)
+  final int commentCount;
   final DateTime createdAt;
   final DateTime updatedAt;
   final ClientInfo? clientInfo;
+  final Map<String, dynamic>? customInfo;
   final FeedbackMark? mark;
+  final List<Attachment>? attachments;
 
   const Feedback({
     required this.id,
     required this.content,
     required this.status,
+    this.type,
     required this.author,
-    this.attachments,
-    this.isPinned = false,
-    this.commentCount = 0,
+    this.pinned = false,
     this.readCount = 0,
+    this.commentCount = 0,
     required this.createdAt,
     required this.updatedAt,
     this.clientInfo,
+    this.customInfo,
     this.mark,
+    this.attachments,
   });
 
   factory Feedback.fromJson(Map<String, dynamic> json) => _$FeedbackFromJson(json);

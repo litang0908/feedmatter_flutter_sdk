@@ -11,6 +11,10 @@ ClientInfo _$ClientInfoFromJson(Map<String, dynamic> json) => ClientInfo(
       appVersionName: json['appVersionName'] as String,
       appPackage: json['appPackage'] as String,
       appType: json['appType'] as String,
+      deviceModel: json['deviceModel'] as String?,
+      deviceBrand: json['deviceBrand'] as String?,
+      deviceSysVersion: json['deviceSysVersion'] as String?,
+      deviceSysVersionInt: json['deviceSysVersionInt'] as String?,
     );
 
 Map<String, dynamic> _$ClientInfoToJson(ClientInfo instance) =>
@@ -19,4 +23,8 @@ Map<String, dynamic> _$ClientInfoToJson(ClientInfo instance) =>
       'appVersionName': instance.appVersionName,
       'appPackage': instance.appPackage,
       'appType': instance.appType,
+      'deviceModel': instance.deviceModel,
+      'deviceBrand': instance.deviceBrand,
+      'deviceSysVersion': instance.deviceSysVersion,
+      'deviceSysVersionInt': instance.deviceSysVersionInt,
     };
