@@ -76,6 +76,15 @@ class FeedMatterClient {
           final message = errorBody['message'] as String? ?? '请求失败';
           final code = errorBody['code'] as String?;
 
+          if (config?.debug ?? false) {
+            print('FeedMatter API Error:');
+            print('Status Code: ${response.statusCode}');
+            print('Headers: ${response.requestOptions.headers}');
+            print('URL: ${response.requestOptions.uri}');
+            print('Method: ${response.requestOptions.method}');
+            print('Error Body: $errorBody');
+          }
+
           final error = response.statusCode == 401 || response.statusCode == 403
               ? FeedMatterAuthException(
                   message,
@@ -198,16 +207,15 @@ class FeedMatterClient {
   Future<Feedback> createFeedback({
     required String content,
     FeedbackType? type,
-    ClientInfo? clientInfo,
     Map<String, dynamic>? customInfo,
     List<Attachment>? attachments,
   }) async {
     final response = await _dio.post(
-      '/feedback',
+      '/api/v1/feedback',
       data: {
         'content': content,
         if (type != null) 'type': type.value,
-        if (clientInfo != null) 'clientInfo': clientInfo.toJson(),
+        'clientInfo': (await _getClientInfo()).toJson(),
         if (customInfo != null) 'customInfo': customInfo,
         if (attachments != null && attachments.isNotEmpty)
           'attachments': attachments.map((a) => a.toJson()).toList(),

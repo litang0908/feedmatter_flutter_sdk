@@ -18,7 +18,7 @@ class Feedback {
   final FeedbackType? type;
   final Author author;
   @JsonKey(name: 'isPinned', defaultValue: false)
-  final bool pinned;
+  final bool isPinned;
   @JsonKey(defaultValue: 0)
   final int readCount;
   @JsonKey(defaultValue: 0)
@@ -36,7 +36,7 @@ class Feedback {
     required this.status,
     this.type,
     required this.author,
-    this.pinned = false,
+    this.isPinned = false,
     this.readCount = 0,
     this.commentCount = 0,
     required this.createdAt,

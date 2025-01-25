@@ -13,7 +13,8 @@ class Comment {
   final String content;
   final Author author;
   final String? parentId;
-  @JsonKey(defaultValue: false)
+  final String? parentUserName;
+  @JsonKey(name: 'isPinned', defaultValue: false)
   final bool isPinned;
   @JsonKey(defaultValue: 0)
   final int replyCount;
@@ -27,6 +28,7 @@ class Comment {
     required this.content,
     required this.author,
     this.parentId,
+    this.parentUserName,
     this.isPinned = false,
     this.replyCount = 0,
     required this.createdAt,
