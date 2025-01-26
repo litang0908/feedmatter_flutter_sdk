@@ -166,6 +166,7 @@ SDK 提供了安全的文件上传功能，包括以下特性：
 - 文件大小限制（默认最大 10MB）
 - 文件名安全处理
 - 支持公开和私密两种上传方式
+- RESTful API 路径：`/api/v1/upload`
 
 ### 上传公开文件
 
@@ -201,6 +202,12 @@ try {
   print('操作失败：$e');
 }
 ```
+
+### API 端点
+
+- 上传公开文件：POST `/api/v1/upload/public`
+- 上传私密文件：POST `/api/v1/upload/private`
+- 获取签名URL：GET `/api/v1/upload/private/{key}`
 
 ## 错误处理
 

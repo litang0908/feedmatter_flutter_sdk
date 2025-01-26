@@ -359,7 +359,7 @@ class FeedMatterClient {
     });
 
     final response = await _handleResponse(() => _dio.post(
-          '/api/upload/public',
+          '/api/v1/upload/public',
           data: formData,
         ));
 
@@ -379,7 +379,7 @@ class FeedMatterClient {
     });
 
     final response = await _handleResponse(() => _dio.post(
-          '/api/upload/private',
+          '/api/v1/upload/private',
           data: formData,
         ));
 
@@ -389,7 +389,7 @@ class FeedMatterClient {
   /// 获取私密文件的签名URL
   Future<String> getSignedUrl(String key) async {
     final response = await _handleResponse(() => _dio.get(
-          '/api/upload/private/$key',
+          '/api/v1/upload/private/$key',
         ));
     return response['url'];
   }

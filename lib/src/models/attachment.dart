@@ -4,13 +4,11 @@ part 'attachment.g.dart';
 
 @JsonSerializable()
 class Attachment {
-  final String id;
   final String fileName;
   final String fileUrl;
   final String fileType;
 
   const Attachment({
-    required this.id,
     required this.fileName,
     required this.fileUrl,
     required this.fileType,
