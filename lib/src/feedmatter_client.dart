@@ -17,7 +17,7 @@ import 'models/feedback.dart';
 class FeedMatterClient {
   FeedMatterConfig? config;
   FeedMatterUser? _user;
-  late final Dio _dio;
+  late Dio _dio;
   void Function(FeedMatterException)? onError;
 
   // 私有静态实例
@@ -59,6 +59,12 @@ class FeedMatterClient {
         requestBody: true,
         responseBody: true,
       ));
+    }
+
+    if (config.debug) {
+      //打印配置信息
+      print('FeedMatterConfig: $config');
+      print('FeedMatterUser: $_user');
     }
 
     // 添加错误处理拦截器
@@ -181,12 +187,12 @@ class FeedMatterClient {
         code: 'CONFIG_NOT_SET',
       );
     }
-
     return {
       'X-API-Key': config!.apiKey,
       'X-User-Id': _user!.userId,
-      'X-User-Name': _user!.userName,
-      if (_user!.userAvatar != null) 'X-User-Avatar': _user!.userAvatar!,
+      'X-User-Name': Uri.encodeComponent(_user!.userName),
+      if (_user!.userAvatar != null)
+        'X-User-Avatar': Uri.encodeComponent(_user!.userAvatar!),
       'Content-Type': 'application/json',
     };
   }
@@ -210,17 +216,18 @@ class FeedMatterClient {
     Map<String, dynamic>? customInfo,
     List<Attachment>? attachments,
   }) async {
-    final response = await _dio.post(
+    final clientInfo = await _getClientInfo();
+    final response = await _handleResponse(() => _dio.post(
       '/api/v1/feedback',
       data: {
         'content': content,
         if (type != null) 'type': type.value,
-        'clientInfo': (await _getClientInfo()).toJson(),
+        'clientInfo': clientInfo.toJson(),
         if (customInfo != null) 'customInfo': customInfo,
         if (attachments != null && attachments.isNotEmpty)
           'attachments': attachments.map((a) => a.toJson()).toList(),
       },
-    );
+    ));
 
     return Feedback.fromJson(response.data);
   }
@@ -272,15 +279,16 @@ class FeedMatterClient {
   Future<Comment> createComment(
     String feedbackId,
     String content, {
+    List<Attachment>? attachments,
     String? parentCommentId,
   }) async {
     final Map<String, dynamic> data = {
       'content': content,
       'clientInfo': (await _getClientInfo()).toJson(),
+      if (attachments != null && attachments.isNotEmpty)
+        'attachments': attachments.map((a) => a.toJson()).toList(),
+      if (parentCommentId?.isNotEmpty ?? false) 'parentId': parentCommentId!,
     };
-    if (parentCommentId?.isNotEmpty ?? false) {
-      data['parentId'] = parentCommentId!;
-    }
 
     return _handleResponse(() => _dio.post(
           '/api/v1/feedback/$feedbackId/comments',
@@ -392,5 +400,19 @@ class FeedMatterClient {
           '/api/v1/upload/private/$key',
         ));
     return response['url'];
+  }
+
+  /// 点赞反馈
+  Future<void> likeFeedback(String feedbackId) async {
+    await _handleResponse(() => _dio.post(
+      '/api/v1/feedback/$feedbackId/like',
+    ));
+  }
+
+  /// 取消点赞反馈
+  Future<void> unlikeFeedback(String feedbackId) async {
+    await _handleResponse(() => _dio.delete(
+      '/api/v1/feedback/$feedbackId/like',
+    ));
   }
 }

@@ -5,7 +5,7 @@ part 'author.g.dart';
 @JsonSerializable()
 class Author {
   final String id;
-  final String username;
+  final String? username;
   final String? avatar;
 
   const Author({
@@ -16,4 +16,4 @@ class Author {
 
   factory Author.fromJson(Map<String, dynamic> json) => _$AuthorFromJson(json);
   Map<String, dynamic> toJson() => _$AuthorToJson(this);
-} 
+}

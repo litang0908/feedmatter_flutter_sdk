@@ -23,6 +23,9 @@ class Feedback {
   final int readCount;
   @JsonKey(defaultValue: 0)
   final int commentCount;
+  final int likeCount;
+  final bool isLiked;
+  final bool allowComment;
   final DateTime createdAt;
   final DateTime updatedAt;
   final ClientInfo? clientInfo;
@@ -39,6 +42,9 @@ class Feedback {
     this.isPinned = false,
     this.readCount = 0,
     this.commentCount = 0,
+    this.likeCount = 0,
+    this.isLiked = false,
+    this.allowComment = true,
     required this.createdAt,
     required this.updatedAt,
     this.clientInfo,

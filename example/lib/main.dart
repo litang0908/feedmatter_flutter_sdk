@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() => _isLoading = true);
     try {
       await client.createFeedback(
-        _feedbackController.text,
+        content: _feedbackController.text,
         customInfo: {'source': 'example_app'},
       );
       _feedbackController.clear();
@@ -174,9 +174,39 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: ListTile(
                           title: Text(feedback.content),
                           subtitle: Text(
-                            '状态: ${feedback.status} · ${feedback.commentCount} 条评论',
+                            '状态: ${feedback.status} · ${feedback.commentCount} 条评论 · ${feedback.likeCount} 个赞',
                           ),
-                          trailing: Text(_formatDate(feedback.createdAt)),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  feedback.isLiked ? Icons.favorite : Icons.favorite_border,
+                                  color: feedback.isLiked ? Colors.red : null,
+                                ),
+                                onPressed: _isLoading
+                                    ? null
+                                    : () async {
+                                        setState(() => _isLoading = true);
+                                        try {
+                                          if (feedback.isLiked) {
+                                            await client.unlikeFeedback(feedback.id);
+                                          } else {
+                                            await client.likeFeedback(feedback.id);
+                                          }
+                                          await _loadFeedbacks(); // 重新加载列表以更新状态
+                                        } catch (e) {
+                                          _showError(e.toString());
+                                        } finally {
+                                          if (mounted) {
+                                            setState(() => _isLoading = false);
+                                          }
+                                        }
+                                      },
+                              ),
+                              Text(_formatDate(feedback.createdAt)),
+                            ],
+                          ),
                         ),
                       );
                     },

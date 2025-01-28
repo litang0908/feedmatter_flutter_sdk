@@ -9,12 +9,20 @@ part of 'attachment.dart';
 Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
       fileName: json['fileName'] as String,
       fileUrl: json['fileUrl'] as String,
-      fileType: json['fileType'] as String,
+      fileType: $enumDecode(_$FileTypeEnumMap, json['fileType']),
     );
 
 Map<String, dynamic> _$AttachmentToJson(Attachment instance) =>
     <String, dynamic>{
       'fileName': instance.fileName,
       'fileUrl': instance.fileUrl,
-      'fileType': instance.fileType,
+      'fileType': _$FileTypeEnumMap[instance.fileType]!,
     };
+
+const _$FileTypeEnumMap = {
+  FileType.img: 'IMG',
+  FileType.vid: 'VID',
+  FileType.doc: 'DOC',
+  FileType.fref: 'FREF',
+  FileType.cref: 'CREF',
+};

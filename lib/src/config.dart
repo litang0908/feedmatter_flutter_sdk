@@ -12,11 +12,16 @@ class FeedMatterConfig {
   final int timeout;
 
   const FeedMatterConfig({
-    required this.baseUrl,
+    this.baseUrl = 'https://fmapi.litangkj.com',
     required this.apiKey,
     this.debug = false,
     this.timeout = 30,
   });
+
+  @override
+  String toString() {
+    return 'FeedMatterConfig(baseUrl: $baseUrl, apiKey: $apiKey, debug: $debug, timeout: $timeout)';
+  }
 }
 
 class FeedMatterUser {
@@ -29,4 +34,9 @@ class FeedMatterUser {
     required this.userName,
     this.userAvatar,
   });
+
+  @override
+  String toString() {
+    return 'FeedMatterUser(userId: $userId, userName: $userName, userAvatar: $userAvatar)';
+  }
 }

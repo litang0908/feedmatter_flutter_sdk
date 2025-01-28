@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../enums/file_type.dart';
 
 part 'attachment.g.dart';
 
@@ -6,7 +7,7 @@ part 'attachment.g.dart';
 class Attachment {
   final String fileName;
   final String fileUrl;
-  final String fileType;
+  final FileType fileType;
 
   const Attachment({
     required this.fileName,
