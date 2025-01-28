@@ -189,11 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     : () async {
                                         setState(() => _isLoading = true);
                                         try {
-                                          if (feedback.isLiked) {
-                                            await client.unlikeFeedback(feedback.id);
-                                          } else {
-                                            await client.likeFeedback(feedback.id);
-                                          }
+                                          await client.toggleLike(feedback.id);
                                           await _loadFeedbacks(); // 重新加载列表以更新状态
                                         } catch (e) {
                                           _showError(e.toString());

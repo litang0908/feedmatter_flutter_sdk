@@ -17,13 +17,14 @@ class Feedback {
   @JsonKey(unknownEnumValue: FeedbackType.other)
   final FeedbackType? type;
   final Author author;
-  @JsonKey(name: 'isPinned', defaultValue: false)
+  @JsonKey(name: 'pinned', defaultValue: false)
   final bool isPinned;
   @JsonKey(defaultValue: 0)
   final int readCount;
   @JsonKey(defaultValue: 0)
   final int commentCount;
   final int likeCount;
+  @JsonKey(name: 'liked', defaultValue: false)
   final bool isLiked;
   final bool allowComment;
   final DateTime createdAt;
@@ -55,4 +56,44 @@ class Feedback {
 
   factory Feedback.fromJson(Map<String, dynamic> json) => _$FeedbackFromJson(json);
   Map<String, dynamic> toJson() => _$FeedbackToJson(this);
+
+  Feedback copyWith({
+    String? id,
+    String? content,
+    FeedbackStatus? status,
+    FeedbackType? type,
+    Author? author,
+    bool? isPinned,
+    int? readCount,
+    int? commentCount,
+    int? likeCount,
+    bool? isLiked,
+    bool? allowComment,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    ClientInfo? clientInfo,
+    Map<String, dynamic>? customInfo,
+    FeedbackMark? mark,
+    List<Attachment>? attachments,
+  }) {
+    return Feedback(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      status: status ?? this.status,
+      type: type ?? this.type,
+      author: author ?? this.author,
+      isPinned: isPinned ?? this.isPinned,
+      readCount: readCount ?? this.readCount,
+      commentCount: commentCount ?? this.commentCount,
+      likeCount: likeCount ?? this.likeCount,
+      isLiked: isLiked ?? this.isLiked,
+      allowComment: allowComment ?? this.allowComment,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      clientInfo: clientInfo ?? this.clientInfo,
+      customInfo: customInfo ?? this.customInfo,
+      mark: mark ?? this.mark,
+      attachments: attachments ?? this.attachments,
+    );
+  }
 }

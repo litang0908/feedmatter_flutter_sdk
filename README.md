@@ -425,3 +425,62 @@ try {
 ## 许可证
 
 MIT License
+
+## ActionCard 链接
+
+FeedMatter SDK 支持通过特殊的 URL Schema 来展示富媒体卡片。格式如下：
+
+```
+actioncard://fm.com/?logo=LOGO_URL&appname=APP_NAME&title=TITLE&desc=DESCRIPTION&image=IMAGE_URL
+```
+
+### 参数说明
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| logo | 否 | 应用/平台图标 URL |
+| appname | 否 | 应用/平台名称 |
+| title | 是 | 卡片标题 |
+| desc | 否 | 卡片描述文本 |
+| image | 否 | 预览图 URL |
+
+### 示例
+
+```dart
+// 小红书用户主页
+final url = 'actioncard://fm.com/?'
+    'logo=https://ci.xiaohongshu.com/fe-platform-service/f190e97a-cf88-4512-9bea-c5f6158bd85b&'
+    'appname=小红书&'
+    'title=用户主页&'
+    'desc=点击查看详情';
+
+// 微信公众号文章
+final url = 'actioncard://fm.com/?'
+    'logo=https://res.wx.qq.com/a/wx_fed/assets/res/OTE0YTAw.png&'
+    'appname=微信公众号&'
+    'title=这是一篇公众号文章&'
+    'desc=点击阅读全文&'
+    'image=https://example.com/preview.jpg';
+```
+
+### 卡片展示效果
+
+卡片包含以下元素：
+1. 左侧显示应用图标（logo），如果未提供则显示默认图标
+2. 中间显示应用名称（appname）和标题（title），以及可选的描述文本（desc）
+3. 右侧显示可选的预览图（image）
+4. 点击卡片会触发链接跳转
+
+### 使用场景
+
+ActionCard 适用于以下场景：
+1. 展示第三方平台的内容预览
+2. 统一不同平台的链接展示样式
+3. 提供更丰富的视觉信息和交互体验
+
+### 注意事项
+
+1. URL 中的所有参数值需要进行 URL 编码
+2. 图片资源（logo 和 image）建议使用 HTTPS 链接
+3. 建议 logo 使用正方形图片，image 使用 16:9 或 4:3 的图片
+4. 标题和描述文本过长时会自动截断

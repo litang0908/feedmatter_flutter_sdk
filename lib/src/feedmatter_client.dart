@@ -402,17 +402,13 @@ class FeedMatterClient {
     return response['url'];
   }
 
-  /// 点赞反馈
-  Future<void> likeFeedback(String feedbackId) async {
-    await _handleResponse(() => _dio.post(
+  /// 切换点赞状态
+  /// 返回更新后的反馈信息
+  Future<Feedback> toggleLike(String feedbackId) async {
+    final response = await _handleResponse(() => _dio.post(
       '/api/v1/feedback/$feedbackId/like',
     ));
-  }
 
-  /// 取消点赞反馈
-  Future<void> unlikeFeedback(String feedbackId) async {
-    await _handleResponse(() => _dio.delete(
-      '/api/v1/feedback/$feedbackId/like',
-    ));
+    return Feedback.fromJson(response);
   }
 }

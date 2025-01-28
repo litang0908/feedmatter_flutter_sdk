@@ -8,7 +8,7 @@ part of 'author.dart';
 
 Author _$AuthorFromJson(Map<String, dynamic> json) => Author(
       id: json['id'] as String,
-      username: json['username'] as String,
+      username: json['username'] as String?,
       avatar: json['avatar'] as String?,
     );
 
