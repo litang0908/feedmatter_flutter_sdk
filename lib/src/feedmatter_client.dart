@@ -229,7 +229,7 @@ class FeedMatterClient {
       },
     ));
 
-    return Feedback.fromJson(response.data);
+    return Feedback.fromJson(response);
   }
 
   Future<List<Feedback>> getFeedbacks({
