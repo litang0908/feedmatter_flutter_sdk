@@ -17,7 +17,7 @@ import 'models/feedback.dart';
 class FeedMatterClient {
   FeedMatterConfig? config;
   FeedMatterUser? _user;
-  late Dio _dio;
+  Dio? _dio;
   void Function(FeedMatterException)? onError;
 
   // 私有静态实例
@@ -47,28 +47,40 @@ class FeedMatterClient {
     _user = user;
     this.onError = onError;
 
-    _dio = Dio(BaseOptions(
-      baseUrl: config.baseUrl,
-      connectTimeout: Duration(seconds: config.timeout),
-      receiveTimeout: Duration(seconds: config.timeout),
-      headers: _headers,
-    ));
-
-    if (config.debug) {
-      _dio.interceptors.add(LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-      ));
-    }
-
     if (config.debug) {
       //打印配置信息
       print('FeedMatterConfig: $config');
       print('FeedMatterUser: $_user');
     }
+  }
 
+  Dio getDio() {
+    _dio ??= _createDio();
+    return _dio!;
+  }
+
+  Dio _createDio() {
+    if (config == null) {
+      throw FeedMatterConfigException(
+        '请先调用 init 方法设置配置信息',
+        code: 'CONFIG_NOT_SET',
+      );
+    }
+    var dio = Dio(BaseOptions(
+      baseUrl: config!.baseUrl,
+      connectTimeout: Duration(seconds: config!.timeout),
+      receiveTimeout: Duration(seconds: config!.timeout),
+      headers: _headers,
+    ));
+
+    if (config!.debug) {
+      dio.interceptors.add(LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+      ));
+    }
     // 添加错误处理拦截器
-    _dio.interceptors.add(InterceptorsWrapper(
+    dio.interceptors.add(InterceptorsWrapper(
       onError: (DioException e, handler) {
         if (e.response != null) {
           final response = e.response!;
@@ -124,15 +136,16 @@ class FeedMatterClient {
         ));
       },
     ));
+    return dio;
   }
 
   /// 清除用户信息
   void clearUser() {
     _user = null;
     // 移除用户相关的 headers
-    _dio.options.headers.remove('X-User-Id');
-    _dio.options.headers.remove('X-User-Name');
-    _dio.options.headers.remove('X-User-Avatar');
+    _dio?.options.headers.remove('X-User-Id');
+    _dio?.options.headers.remove('X-User-Name');
+    _dio?.options.headers.remove('X-User-Avatar');
   }
 
   String _getAppType() => Platform.operatingSystem.toUpperCase();
@@ -217,17 +230,17 @@ class FeedMatterClient {
     List<Attachment>? attachments,
   }) async {
     final clientInfo = await _getClientInfo();
-    final response = await _handleResponse(() => _dio.post(
-      '/api/v1/feedback',
-      data: {
-        'content': content,
-        if (type != null) 'type': type.value,
-        'clientInfo': clientInfo.toJson(),
-        if (customInfo != null) 'customInfo': customInfo,
-        if (attachments != null && attachments.isNotEmpty)
-          'attachments': attachments.map((a) => a.toJson()).toList(),
-      },
-    ));
+    final response = await _handleResponse(() => getDio().post(
+          '/api/v1/feedback',
+          data: {
+            'content': content,
+            if (type != null) 'type': type.value,
+            'clientInfo': clientInfo.toJson(),
+            if (customInfo != null) 'customInfo': customInfo,
+            if (attachments != null && attachments.isNotEmpty)
+              'attachments': attachments.map((a) => a.toJson()).toList(),
+          },
+        ));
 
     return Feedback.fromJson(response);
   }
@@ -237,7 +250,7 @@ class FeedMatterClient {
     int size = 20,
     String? keyword,
   }) async {
-    final response = await _handleResponse(() => _dio.get(
+    final response = await _handleResponse(() => getDio().get(
           '/api/v1/feedback',
           queryParameters: {
             'page': page,
@@ -256,7 +269,7 @@ class FeedMatterClient {
     int size = 20,
     String? keyword,
   }) async {
-    final response = await _handleResponse(() => _dio.get(
+    final response = await _handleResponse(() => getDio().get(
           '/api/v1/feedback/my',
           queryParameters: {
             'page': page,
@@ -271,7 +284,7 @@ class FeedMatterClient {
   }
 
   Future<Feedback> getFeedback(String id) async {
-    return _handleResponse(() => _dio.get(
+    return _handleResponse(() => getDio().get(
           '/api/v1/feedback/$id',
         )).then((json) => Feedback.fromJson(json));
   }
@@ -290,7 +303,7 @@ class FeedMatterClient {
       if (parentCommentId?.isNotEmpty ?? false) 'parentId': parentCommentId!,
     };
 
-    return _handleResponse(() => _dio.post(
+    return _handleResponse(() => getDio().post(
           '/api/v1/feedback/$feedbackId/comments',
           data: data,
         )).then((json) => Comment.fromJson(json));
@@ -302,7 +315,7 @@ class FeedMatterClient {
     int size = 20,
     String? sortBy,
   }) async {
-    final response = await _handleResponse(() => _dio.get(
+    final response = await _handleResponse(() => getDio().get(
           '/api/v1/feedback/$feedbackId/comments',
           queryParameters: {
             'page': page,
@@ -366,7 +379,7 @@ class FeedMatterClient {
       ),
     });
 
-    final response = await _handleResponse(() => _dio.post(
+    final response = await _handleResponse(() => getDio().post(
           '/api/v1/upload/public',
           data: formData,
         ));
@@ -386,7 +399,7 @@ class FeedMatterClient {
       ),
     });
 
-    final response = await _handleResponse(() => _dio.post(
+    final response = await _handleResponse(() => getDio().post(
           '/api/v1/upload/private',
           data: formData,
         ));
@@ -396,7 +409,7 @@ class FeedMatterClient {
 
   /// 获取私密文件的签名URL
   Future<String> getSignedUrl(String key) async {
-    final response = await _handleResponse(() => _dio.get(
+    final response = await _handleResponse(() => getDio().get(
           '/api/v1/upload/private/$key',
         ));
     return response['url'];
@@ -405,10 +418,9 @@ class FeedMatterClient {
   /// 切换点赞状态
   /// 返回更新后的反馈信息
   Future<Feedback> toggleLike(String feedbackId) async {
-    final response = await _handleResponse(() => _dio.post(
-      '/api/v1/feedback/$feedbackId/like',
-    ));
-
+    final response = await _handleResponse(
+      () => getDio().post('/api/v1/feedback/$feedbackId/like'),
+    );
     return Feedback.fromJson(response);
   }
 }
