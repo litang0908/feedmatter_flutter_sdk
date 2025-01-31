@@ -26,6 +26,7 @@ class Feedback {
   final int likeCount;
   @JsonKey(name: 'liked', defaultValue: false)
   final bool isLiked;
+  @JsonKey(name: 'allowComment', defaultValue: true)
   final bool allowComment;
   final DateTime createdAt;
   final DateTime updatedAt;
