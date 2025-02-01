@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -12,6 +14,7 @@ import 'models/attachment.dart';
 import 'models/client_info.dart';
 import 'models/comment.dart';
 import 'models/feedback.dart';
+import 'models/project_config.dart';
 
 /// FeedMatter SDK 客户端
 class FeedMatterClient {
@@ -230,17 +233,20 @@ class FeedMatterClient {
     List<Attachment>? attachments,
   }) async {
     final clientInfo = await _getClientInfo();
-    final response = await _handleResponse(() => getDio().post(
-          '/api/v1/feedback',
-          data: {
-            'content': content,
-            if (type != null) 'type': type.value,
-            'clientInfo': clientInfo.toJson(),
-            if (customInfo != null) 'customInfo': customInfo,
-            if (attachments != null && attachments.isNotEmpty)
-              'attachments': attachments.map((a) => a.toJson()).toList(),
-          },
-        ));
+    final response = await _handleResponse(
+      () => _request(
+        'POST',
+        '/api/v1/feedbacks',
+        data: {
+          'content': content,
+          if (type != null) 'type': type.value,
+          'clientInfo': clientInfo.toJson(),
+          if (customInfo != null) 'customInfo': customInfo,
+          if (attachments != null && attachments.isNotEmpty)
+            'attachments': attachments.map((a) => a.toJson()).toList(),
+        },
+      ),
+    );
 
     return Feedback.fromJson(response);
   }
@@ -250,14 +256,17 @@ class FeedMatterClient {
     int size = 20,
     String? keyword,
   }) async {
-    final response = await _handleResponse(() => getDio().get(
-          '/api/v1/feedback',
-          queryParameters: {
-            'page': page,
-            'size': size,
-            if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
-          },
-        ));
+    final response = await _handleResponse(
+      () => _request(
+        'GET',
+        '/api/v1/feedbacks',
+        queryParameters: {
+          'page': page,
+          'size': size,
+          if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
+        },
+      ),
+    );
 
     return (response['content'] as List)
         .map((item) => Feedback.fromJson(item))
@@ -269,8 +278,9 @@ class FeedMatterClient {
     int size = 20,
     String? keyword,
   }) async {
-    final response = await _handleResponse(() => getDio().get(
-          '/api/v1/feedback/my',
+    final response = await _handleResponse(() => _request(
+          'GET',
+          '/api/v1/feedbacks/my',
           queryParameters: {
             'page': page,
             'size': size,
@@ -289,7 +299,8 @@ class FeedMatterClient {
     int page = 0,
     int size = 20,
   }) async {
-    final response = await _handleResponse(() => getDio().get(
+    final response = await _handleResponse(() => _request(
+          'GET',
           '/api/v1/feedbacks/user/$userId',
           queryParameters: {
             'page': page,
@@ -303,8 +314,9 @@ class FeedMatterClient {
   }
 
   Future<Feedback> getFeedback(String id) async {
-    return _handleResponse(() => getDio().get(
-          '/api/v1/feedback/$id',
+    return _handleResponse(() => _request(
+          'GET',
+          '/api/v1/feedbacks/$id',
         )).then((json) => Feedback.fromJson(json));
   }
 
@@ -322,8 +334,9 @@ class FeedMatterClient {
       if (parentCommentId?.isNotEmpty ?? false) 'parentId': parentCommentId!,
     };
 
-    return _handleResponse(() => getDio().post(
-          '/api/v1/feedback/$feedbackId/comments',
+    return _handleResponse(() => _request(
+          'POST',
+          '/api/v1/feedbacks/$feedbackId/comments',
           data: data,
         )).then((json) => Comment.fromJson(json));
   }
@@ -334,8 +347,9 @@ class FeedMatterClient {
     int size = 20,
     String? sortBy,
   }) async {
-    final response = await _handleResponse(() => getDio().get(
-          '/api/v1/feedback/$feedbackId/comments',
+    final response = await _handleResponse(() => _request(
+          'GET',
+          '/api/v1/feedbacks/$feedbackId/comments',
           queryParameters: {
             'page': page,
             'size': size,
@@ -398,7 +412,8 @@ class FeedMatterClient {
       ),
     });
 
-    final response = await _handleResponse(() => getDio().post(
+    final response = await _handleResponse(() => _request(
+          'POST',
           '/api/v1/upload/public',
           data: formData,
         ));
@@ -418,7 +433,8 @@ class FeedMatterClient {
       ),
     });
 
-    final response = await _handleResponse(() => getDio().post(
+    final response = await _handleResponse(() => _request(
+          'POST',
           '/api/v1/upload/private',
           data: formData,
         ));
@@ -428,7 +444,8 @@ class FeedMatterClient {
 
   /// 获取私密文件的签名URL
   Future<String> getSignedUrl(String key) async {
-    final response = await _handleResponse(() => getDio().get(
+    final response = await _handleResponse(() => _request(
+          'GET',
           '/api/v1/upload/private/$key',
         ));
     return response['url'];
@@ -438,8 +455,76 @@ class FeedMatterClient {
   /// 返回更新后的反馈信息
   Future<Feedback> toggleLike(String feedbackId) async {
     final response = await _handleResponse(
-      () => getDio().post('/api/v1/feedback/$feedbackId/like'),
+      () => _request('POST', '/api/v1/feedbacks/$feedbackId/like'),
     );
     return Feedback.fromJson(response);
+  }
+
+  /// Get project configuration
+  Future<ProjectConfig> getProjectConfig() async {
+    final response = await _handleResponse(
+      () => _request(
+        'GET',
+        '/api/v1/projects/config',
+      ),
+    );
+    return ProjectConfig.fromJson(response);
+  }
+
+  // 每次请求生成签名
+  String _generateSignature(String timestamp, String method, String path,
+      Map<String, dynamic>? params) {
+    // 如果没有参数，使用空 Map
+    final signParams = params ?? {};
+    
+    // 按照固定规则拼接字符串
+    final String stringToSign =
+        '$method\n$path\n$timestamp\n${json.encode(signParams)}';
+    
+    // 使用 apiSecret 进行 HMAC-SHA256 签名
+    final hmac = Hmac(sha256, utf8.encode(config!.apiSecret));
+    final digest = hmac.convert(utf8.encode(stringToSign));
+    return base64.encode(digest.bytes);
+  }
+
+  Future<Response> _request(
+    String method,
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    
+    // 根据请求类型选择要签名的参数
+    Map<String, dynamic>? signParams;
+    if (method == 'GET') {
+      signParams = queryParameters;
+    } else {
+      // POST/PUT 等请求
+      if (data is Map<String, dynamic>) {
+        signParams = data;
+      } else if (data is FormData) {
+        // 对于文件上传，只签名文件名
+        signParams = {
+          'filename': data.files.first.value.filename,
+        };
+      }
+    }
+    
+    final signature = _generateSignature(timestamp, method, path, signParams);
+
+    var requestHeaders = _headers;
+    requestHeaders['X-Timestamp'] = timestamp;
+    requestHeaders['X-Signature'] = signature;
+
+    return getDio().request(
+      path,
+      options: Options(
+        method: method,
+        headers: requestHeaders,
+      ),
+      data: data,
+      queryParameters: queryParameters,
+    );
   }
 }

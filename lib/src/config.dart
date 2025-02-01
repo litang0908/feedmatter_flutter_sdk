@@ -5,6 +5,9 @@ class FeedMatterConfig {
   /// API Key
   final String apiKey;
 
+  /// API Secret
+  final String apiSecret;
+
   /// 是否启用调试模式
   final bool debug;
 
@@ -14,13 +17,14 @@ class FeedMatterConfig {
   const FeedMatterConfig({
     this.baseUrl = 'https://fmapi.litangkj.com',
     required this.apiKey,
+    required this.apiSecret,
     this.debug = false,
     this.timeout = 30,
   });
 
   @override
   String toString() {
-    return 'FeedMatterConfig(baseUrl: $baseUrl, apiKey: $apiKey, debug: $debug, timeout: $timeout)';
+    return 'FeedMatterConfig(baseUrl: $baseUrl, apiKey: $apiKey, apiSecret: $apiSecret, debug: $debug, timeout: $timeout)';
   }
 }
 

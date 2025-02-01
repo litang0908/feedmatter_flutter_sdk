@@ -13,3 +13,4 @@ export 'src/models/author.dart';
 export 'src/enums/feedback_status.dart';
 export 'src/constants.dart';
 export 'src/models/feedback_mark.dart';
+export 'src/models/project_config.dart';
