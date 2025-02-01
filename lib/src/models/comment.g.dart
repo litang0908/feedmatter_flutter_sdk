@@ -12,7 +12,7 @@ Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
       author: Author.fromJson(json['author'] as Map<String, dynamic>),
       parentId: json['parentId'] as String?,
       parentUserName: json['parentUserName'] as String?,
-      isPinned: json['isPinned'] as bool? ?? false,
+      pinned: json['pinned'] as bool? ?? false,
       replyCount: (json['replyCount'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
       clientInfo: json['clientInfo'] == null
@@ -32,7 +32,7 @@ Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
       'author': instance.author,
       'parentId': instance.parentId,
       'parentUserName': instance.parentUserName,
-      'isPinned': instance.isPinned,
+      'pinned': instance.pinned,
       'replyCount': instance.replyCount,
       'createdAt': instance.createdAt.toIso8601String(),
       'clientInfo': instance.clientInfo,

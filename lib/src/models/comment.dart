@@ -14,8 +14,8 @@ class Comment {
   final Author author;
   final String? parentId;
   final String? parentUserName;
-  @JsonKey(name: 'isPinned', defaultValue: false)
-  final bool isPinned;
+  @JsonKey(name: 'pinned', defaultValue: false)
+  final bool pinned;
   @JsonKey(defaultValue: 0)
   final int replyCount;
   final DateTime createdAt;
@@ -29,7 +29,7 @@ class Comment {
     required this.author,
     this.parentId,
     this.parentUserName,
-    this.isPinned = false,
+    this.pinned = false,
     this.replyCount = 0,
     required this.createdAt,
     this.clientInfo,
