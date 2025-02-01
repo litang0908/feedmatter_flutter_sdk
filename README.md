@@ -13,16 +13,15 @@ and the Flutter guide for
 
 # FeedMatter Flutter SDK
 
-FeedMatter Flutter SDK 是一个用于快速集成用户反馈功能的工具包。它提供了一套简单易用的 API，帮助开发者在 Flutter 应用中实现反馈收集、评论互动等功能。
+FeedMatter Flutter SDK 提供了与 FeedMatter API 交互的简单方式，用于收集和管理用户反馈。
 
-## 特性
+## 功能特性
 
-- 反馈管理：创建、查询、评论
-- 多种反馈类型：建议、错误报告、咨询、求助等
-- 自动收集设备信息
-- 文件上传：支持公开和私密两种模式
-- 评论互动：支持多级评论
-- 完整的错误处理机制
+- 创建和管理反馈
+- 评论功能
+- 文件上传（支持图片和视频）
+- 点赞功能
+- 项目配置管理
 
 ## 安装
 
@@ -160,6 +159,21 @@ final comments = await client.getComments(
 );
 ```
 
+### 7. 项目配置
+
+```dart
+// 获取项目配置
+try {
+  final config = await client.getProjectConfig();
+  print('反馈提示词: ${config.feedbackPrompt}');
+  print('评论提示词: ${config.commentPrompt}');
+  print('反馈是否支持附件: ${config.feedbackAttachmentEnabled}');
+  print('评论是否支持附件: ${config.commentAttachmentEnabled}');
+} catch (e) {
+  print('获取配置失败: $e');
+}
+```
+
 ## 文件上传
 
 SDK 提供了安全的文件上传功能，包括以下特性：
@@ -208,6 +222,13 @@ try {
 - 上传公开文件：POST `/api/v1/upload/public`
 - 上传私密文件：POST `/api/v1/upload/private`
 - 获取签名URL：GET `/api/v1/upload/private/{key}`
+- 获取项目配置：GET `/api/v1/projects/config`
+- 创建反馈：POST `/api/v1/feedbacks`
+- 获取反馈列表：GET `/api/v1/feedbacks`
+- 获取反馈详情：GET `/api/v1/feedbacks/{id}`
+- 获取评论列表：GET `/api/v1/feedbacks/{id}/comments`
+- 添加评论：POST `/api/v1/feedbacks/{id}/comments`
+- 切换点赞：POST `/api/v1/feedbacks/{id}/like`
 
 ## 错误处理
 
@@ -314,6 +335,20 @@ try {
 | deviceBrand | String | 否 | 设备品牌 |
 | deviceSysVersion | String | 否 | 系统版本名称 |
 | deviceSysVersionInt | String | 否 | 系统版本号 |
+
+### ProjectConfig
+
+项目配置信息模型。
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| feedbackPrompt | String? | 添加反馈时的提示词 |
+| commentPrompt | String? | 添加评论时的提示词 |
+| feedbackAttachmentEnabled | bool | 反馈是否支持附件 |
+| commentAttachmentEnabled | bool | 评论是否支持附件 |
+| callbackUrl | String? | 回调URL |
+| callbackToken | String? | 回调Token |
+| callbackEnabled | bool | 是否启用回调 |
 
 ## 数据模型
 
