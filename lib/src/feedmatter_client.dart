@@ -283,6 +283,25 @@ class FeedMatterClient {
         .toList();
   }
 
+  /// 获取指定用户的反馈列表
+  Future<List<Feedback>> getUserFeedbacks(
+    String userId, {
+    int page = 0,
+    int size = 20,
+  }) async {
+    final response = await _handleResponse(() => getDio().get(
+          '/api/v1/feedbacks/user/$userId',
+          queryParameters: {
+            'page': page,
+            'size': size,
+          },
+        ));
+
+    return (response['content'] as List)
+        .map((item) => Feedback.fromJson(item))
+        .toList();
+  }
+
   Future<Feedback> getFeedback(String id) async {
     return _handleResponse(() => getDio().get(
           '/api/v1/feedback/$id',
