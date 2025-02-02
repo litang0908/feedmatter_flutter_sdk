@@ -55,6 +55,7 @@ client.init(
   feedmatter.FeedMatterConfig(
     baseUrl: 'https://fmapi.litangkj.com',  // API 地址
     apiKey: 'your-api-key',                 // 项目 API Key
+    apiSecret: 'your-api-secret',           // 项目 API Secret
     timeout: 30,                            // 超时时间（秒）
     debug: true,                            // 是否开启调试模式
   ),
@@ -69,6 +70,8 @@ client.init(
   },
 );
 ```
+
+> **注意**：SDK 的初始化是一个轻量级操作，不会产生额外的网络请求或性能开销。只有在调用具体的 API 方法（如提交反馈、获取列表等）时，才会发起实际的网络请求。这意味着你可以在应用启动时就进行初始化，而不用担心影响应用的启动速度。
 
 ### 2. 提交反馈
 
@@ -312,6 +315,7 @@ try {
 |------|------|------|------|
 | baseUrl | String | 是 | API 服务器地址 |
 | apiKey | String | 是 | 项目 API Key |
+| apiSecret | String | 是 | 项目 API Secret |
 | timeout | int | 否 | 请求超时时间（秒），默认 30 |
 | debug | bool | 否 | 是否开启调试模式，默认 false |
 

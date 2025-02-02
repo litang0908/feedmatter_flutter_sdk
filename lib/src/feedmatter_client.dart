@@ -476,11 +476,25 @@ class FeedMatterClient {
       Map<String, dynamic>? params) {
     // 如果没有参数，使用空 Map
     final signParams = params ?? {};
-    
+
+    // 将所有参数值转为字符串，并按键排序
+    final sortedEntries = signParams.entries
+        .map((e) => MapEntry(e.key, e.value.toString()))
+        .toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    final sortedParams = Map.fromEntries(sortedEntries);
+
+    // 确保路径以 / 开头
+    final normalizedPath = path.startsWith('/') ? path : '/$path';
+
     // 按照固定规则拼接字符串
     final String stringToSign =
-        '$method\n$path\n$timestamp\n${json.encode(signParams)}';
-    
+        '$method\n$normalizedPath\n$timestamp\n${json.encode(sortedParams)}';
+
+    if (config?.debug == true) {
+      print('String to sign: $stringToSign');
+    }
+
     // 使用 apiSecret 进行 HMAC-SHA256 签名
     final hmac = Hmac(sha256, utf8.encode(config!.apiSecret));
     final digest = hmac.convert(utf8.encode(stringToSign));
@@ -494,7 +508,7 @@ class FeedMatterClient {
     Map<String, dynamic>? queryParameters,
   }) {
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    
+
     // 根据请求类型选择要签名的参数
     Map<String, dynamic>? signParams;
     if (method == 'GET') {
@@ -504,27 +518,35 @@ class FeedMatterClient {
       if (data is Map<String, dynamic>) {
         signParams = data;
       } else if (data is FormData) {
-        // 对于文件上传，只签名文件名
+        // 对于文件上传，只签名文件名和大小
+        final file = data.files.first.value;
         signParams = {
-          'filename': data.files.first.value.filename,
+          'filename': file.filename,
+          'size': file.length,
         };
       }
     }
-    
+
     final signature = _generateSignature(timestamp, method, path, signParams);
 
     var requestHeaders = _headers;
     requestHeaders['X-Timestamp'] = timestamp;
     requestHeaders['X-Signature'] = signature;
 
+    if (config?.debug == true) {
+      print('Request headers: $requestHeaders');
+      print('Request params: $signParams');
+      print('Timestamp: $timestamp');
+    }
+
     return getDio().request(
       path,
+      data: data,
+      queryParameters: queryParameters,
       options: Options(
         method: method,
         headers: requestHeaders,
       ),
-      data: data,
-      queryParameters: queryParameters,
     );
   }
 }

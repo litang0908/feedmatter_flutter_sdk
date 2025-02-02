@@ -16,23 +16,19 @@ class ProjectConfig {
   /// 评论是否支持附件
   final bool commentAttachmentEnabled;
 
-  /// 回调URL
-  final String? callbackUrl;
+  /// 最大附件数量
+  final int maxAttachments;
 
-  /// 回调Token
-  final String? callbackToken;
-
-  /// 是否启用回调
-  final bool callbackEnabled;
+  /// 最大上传文件大小
+  final int maxUploadFileSize;
 
   const ProjectConfig({
     this.feedbackPrompt,
     this.commentPrompt,
     this.feedbackAttachmentEnabled = true,
     this.commentAttachmentEnabled = true,
-    this.callbackUrl,
-    this.callbackToken,
-    this.callbackEnabled = false,
+    this.maxAttachments = 8,
+    this.maxUploadFileSize = 10 * 1024 * 1024,
   });
 
   factory ProjectConfig.fromJson(Map<String, dynamic> json) =>
@@ -47,8 +43,7 @@ class ProjectConfig {
         'commentPrompt: $commentPrompt, '
         'feedbackAttachmentEnabled: $feedbackAttachmentEnabled, '
         'commentAttachmentEnabled: $commentAttachmentEnabled, '
-        'callbackUrl: $callbackUrl, '
-        'callbackToken: $callbackToken, '
-        'callbackEnabled: $callbackEnabled)';
+        'maxAttachments: $maxAttachments, '
+        'maxUploadFileSize: $maxUploadFileSize)';
   }
-} 
+}

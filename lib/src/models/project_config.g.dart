@@ -14,9 +14,9 @@ ProjectConfig _$ProjectConfigFromJson(Map<String, dynamic> json) =>
           json['feedbackAttachmentEnabled'] as bool? ?? true,
       commentAttachmentEnabled:
           json['commentAttachmentEnabled'] as bool? ?? true,
-      callbackUrl: json['callbackUrl'] as String?,
-      callbackToken: json['callbackToken'] as String?,
-      callbackEnabled: json['callbackEnabled'] as bool? ?? false,
+      maxAttachments: (json['maxAttachments'] as num?)?.toInt() ?? 8,
+      maxUploadFileSize:
+          (json['maxUploadFileSize'] as num?)?.toInt() ?? 10 * 1024 * 1024,
     );
 
 Map<String, dynamic> _$ProjectConfigToJson(ProjectConfig instance) =>
@@ -25,7 +25,6 @@ Map<String, dynamic> _$ProjectConfigToJson(ProjectConfig instance) =>
       'commentPrompt': instance.commentPrompt,
       'feedbackAttachmentEnabled': instance.feedbackAttachmentEnabled,
       'commentAttachmentEnabled': instance.commentAttachmentEnabled,
-      'callbackUrl': instance.callbackUrl,
-      'callbackToken': instance.callbackToken,
-      'callbackEnabled': instance.callbackEnabled,
+      'maxAttachments': instance.maxAttachments,
+      'maxUploadFileSize': instance.maxUploadFileSize,
     };
