@@ -527,12 +527,8 @@ class FeedMatterClient {
       if (data is Map<String, dynamic>) {
         signParams = data;
       } else if (data is FormData) {
-        // 对于文件上传，只签名文件名和大小
-        final file = data.files.first.value;
-        signParams = {
-          'filename': file.filename,
-          'size': file.length,
-        };
+        // 对于文件上传，使用空对象进行签名
+        signParams = {};
       }
     }
 
@@ -544,7 +540,8 @@ class FeedMatterClient {
 
     if (config?.debug == true) {
       print('Request headers: $requestHeaders');
-      print('Request params: $signParams');
+      print('Request sign params: $signParams');
+      print('Request params: $data');
       print('Timestamp: $timestamp');
     }
 
