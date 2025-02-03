@@ -478,10 +478,19 @@ class FeedMatterClient {
     // 如果没有参数，使用空 Map
     final signParams = params ?? {};
 
-    // 统一的参数排序逻辑
-    Map<String, dynamic> sortedParams = Map.fromEntries(
-        signParams.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
-    //要记得 json encode，这样后端的读取也一致
+    Map<String, dynamic> convertedParams;
+    if (method == 'GET') {
+      // 对于 GET 请求，确保所有值都是字符串类型
+      convertedParams =
+          signParams.map((key, value) => MapEntry(key, value.toString()));
+    } else {
+      convertedParams = signParams;
+    }
+    // 参数排序
+    final Map<String, dynamic> sortedParams = Map.fromEntries(
+        convertedParams.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key)));
+    //记得 json encode，这样后端的读取也一致
     final paramsJson = json.encode(sortedParams);
 
     // 确保路径以 / 开头
