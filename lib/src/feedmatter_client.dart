@@ -326,9 +326,10 @@ class FeedMatterClient {
     List<Attachment>? attachments,
     String? parentCommentId,
   }) async {
+    final clientInfo = await _getClientInfo();
     final Map<String, dynamic> data = {
       'content': content,
-      'clientInfo': (await _getClientInfo()).toJson(),
+      'clientInfo': clientInfo.toJson(),
       if (attachments != null && attachments.isNotEmpty)
         'attachments': attachments.map((a) => a.toJson()).toList(),
       if (parentCommentId?.isNotEmpty ?? false) 'parentId': parentCommentId!,
@@ -477,19 +478,18 @@ class FeedMatterClient {
     // 如果没有参数，使用空 Map
     final signParams = params ?? {};
 
-    // 将所有参数值转为字符串，并按键排序
-    final sortedEntries = signParams.entries
-        .map((e) => MapEntry(e.key, e.value.toString()))
-        .toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
-    final sortedParams = Map.fromEntries(sortedEntries);
+    // 统一的参数排序逻辑
+    Map<String, dynamic> sortedParams = Map.fromEntries(
+        signParams.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+    //要记得 json encode，这样后端的读取也一致
+    final paramsJson = json.encode(sortedParams);
 
     // 确保路径以 / 开头
     final normalizedPath = path.startsWith('/') ? path : '/$path';
 
     // 按照固定规则拼接字符串
     final String stringToSign =
-        '$method\n$normalizedPath\n$timestamp\n${json.encode(sortedParams)}';
+        '$method\n$normalizedPath\n$timestamp\n$paramsJson';
 
     if (config?.debug == true) {
       print('String to sign: $stringToSign');
