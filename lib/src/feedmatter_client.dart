@@ -18,6 +18,9 @@ import 'models/project_config.dart';
 
 /// FeedMatter SDK 客户端
 class FeedMatterClient {
+  static const String _imageStyleSmall240 = '-small240.webp';
+  static const String _imageStyleOriginal = '-original.webp';
+
   FeedMatterConfig? config;
   FeedMatterUser? _user;
   Dio? _dio;
@@ -555,4 +558,10 @@ class FeedMatterClient {
       ),
     );
   }
+
+  //根据传入的图片 url，获取缩略图 url
+  static String getImageThumbnailUrl(String url) => "$url$_imageStyleSmall240";
+
+  static String getImageOriginalUrl(String url) => "$url$_imageStyleOriginal";
+
 }
