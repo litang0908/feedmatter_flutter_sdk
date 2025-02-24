@@ -106,6 +106,7 @@ enum FeedbackType {
 ```
 
 注意：
+
 - `notice` 类型仅限管理员使用
 - 如果不指定类型，默认为 `other`
 - 普通用户使用 `notice` 类型会收到错误响应
@@ -170,8 +171,83 @@ try {
   final config = await client.getProjectConfig();
   print('反馈提示词: ${config.feedbackPrompt}');
   print('评论提示词: ${config.commentPrompt}');
+  print('是否允许发布反馈: ${config.feedbackEnabled}');
+  print('是否允许发布评论: ${config.commentEnabled}');
   print('反馈是否支持附件: ${config.feedbackAttachmentEnabled}');
   print('评论是否支持附件: ${config.commentAttachmentEnabled}');
+  print('游客是否可以发布反馈: ${config.guestFeedbackEnabled}');
+  print('游客是否可以发布评论: ${config.guestCommentEnabled}');
+  print('最大内容长度: ${config.maxContentLength}');
+  print('最大附件数量: ${config.maxAttachments}');
+  print('最大文件大小: ${config.maxUploadFileSize}');
+} catch (e) {
+  print('获取配置失败: $e');
+}
+```
+
+项目配置包含以下字段：
+
+| 字段                      | 类型    | 默认值 | 说明                       |
+| ------------------------- | ------- | ------ | -------------------------- |
+| feedbackPrompt            | String? | null   | 添加反馈时的提示词         |
+| commentPrompt             | String? | null   | 添加评论时的提示词         |
+| feedbackEnabled           | bool    | true   | 是否允许发布反馈           |
+| commentEnabled            | bool    | true   | 是否允许发布评论           |
+| feedbackAttachmentEnabled | bool    | true   | 反馈是否支持附件           |
+| commentAttachmentEnabled  | bool    | true   | 评论是否支持附件           |
+| guestFeedbackEnabled      | bool    | false  | 未登录用户是否可以发布反馈 |
+| guestCommentEnabled       | bool    | false  | 未登录用户是否可以发布评论 |
+| maxContentLength          | int     | 1000   | 最大内容长度               |
+| maxAttachments            | int     | 8      | 最大附件数量               |
+| maxUploadFileSize         | int     | 10MB   | 最大上传文件大小           |
+
+使用示例：
+
+```dart
+// 获取项目配置
+try {
+  final config = await client.getProjectConfig();
+
+  // 1. 检查是否允许发布反馈
+  if (!config.feedbackEnabled) {
+    showToast('该项目已关闭反馈功能');
+    return;
+  }
+
+  // 2. 检查游客权限
+  if (!config.guestFeedbackEnabled && !isUserLoggedIn) {
+    showToast('未登录用户不能发布反馈');
+    return;
+  }
+
+  // 3. 检查附件权限
+  if (!config.feedbackAttachmentEnabled) {
+    // 隐藏附件上传按钮
+    attachmentButton.visible = false;
+  }
+
+  // 4. 设置提示词
+  if (config.feedbackPrompt != null) {
+    feedbackInput.hint = config.feedbackPrompt;
+  }
+
+  // 5. 检查内容长度
+  if (content.length > config.maxContentLength) {
+    showToast('内容超出长度限制');
+    return;
+  }
+
+  // 6. 检查附件数量
+  if (attachments.length > config.maxAttachments) {
+    showToast('附件数量超出限制');
+    return;
+  }
+
+  // 7. 检查文件大小
+  if (file.size > config.maxUploadFileSize) {
+    showToast('文件大小超出限制');
+    return;
+  }
 } catch (e) {
   print('获取配置失败: $e');
 }
@@ -180,6 +256,7 @@ try {
 ## 文件上传
 
 SDK 提供了安全的文件上传功能，包括以下特性：
+
 - 文件大小限制（默认最大 10MB）
 - 文件名安全处理
 - 支持公开和私密两种上传方式
@@ -211,7 +288,7 @@ try {
 try {
   // 1. 上传文件，获取文件 key
   final key = await client.uploadPrivateFile(File('path/to/private.pdf'));
-  
+
   // 2. 使用 key 获取签名访问 URL
   final signedUrl = await client.getSignedUrl(key);
   print('文件访问链接：$signedUrl');
@@ -224,7 +301,7 @@ try {
 
 - 上传公开文件：POST `/api/v1/upload/public`
 - 上传私密文件：POST `/api/v1/upload/private`
-- 获取签名URL：GET `/api/v1/upload/private/{key}`
+- 获取签名 URL：GET `/api/v1/upload/private/{key}`
 - 获取项目配置：GET `/api/v1/projects/config`
 - 创建反馈：POST `/api/v1/feedbacks`
 - 获取反馈列表：GET `/api/v1/feedbacks`
@@ -238,10 +315,12 @@ try {
 SDK 定义了以下几种异常类型：
 
 1. `FeedMatterConfigException`: 配置错误
+
    - 未初始化 SDK
    - 配置信息不完整
 
 2. `FeedMatterAuthException`: 认证错误
+
    - API Key 无效
    - 权限不足
 
@@ -253,6 +332,7 @@ SDK 定义了以下几种异常类型：
 你可以通过以下两种方式处理错误：
 
 1. 全局错误处理：
+
 ```dart
 client.init(
   config,
@@ -268,6 +348,7 @@ client.init(
 ```
 
 2. 局部错误处理：
+
 ```dart
 try {
   await client.createFeedback(content: '反馈内容');
@@ -281,23 +362,28 @@ try {
 ## 最佳实践
 
 1. 初始化时机
+
    - 建议在应用启动时进行初始化
    - 确保在使用 SDK 功能前完成初始化
 
 2. 错误处理
+
    - 建议设置全局错误处理函数
    - 对重要操作使用局部错误处理
    - 在 UI 层展示友好的错误提示
 
 3. 用户信息
+
    - 在用户登录后更新用户信息
    - 在用户登出时调用 `clearUser()`
 
 4. 调试模式
+
    - 开发时开启 debug 模式查看详细日志
    - 生产环境建议关闭 debug 模式
 
 5. 设备信息
+
    - SDK 会自动收集设备信息
    - 无需手动设置设备信息
    - 设备信息字段为空时不会占用存储空间
@@ -311,48 +397,54 @@ try {
 
 ### FeedMatterConfig
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| baseUrl | String | 是 | API 服务器地址 |
-| apiKey | String | 是 | 项目 API Key |
-| apiSecret | String | 是 | 项目 API Secret |
-| timeout | int | 否 | 请求超时时间（秒），默认 30 |
-| debug | bool | 否 | 是否开启调试模式，默认 false |
+| 参数      | 类型   | 必填 | 说明                         |
+| --------- | ------ | ---- | ---------------------------- |
+| baseUrl   | String | 是   | API 服务器地址               |
+| apiKey    | String | 是   | 项目 API Key                 |
+| apiSecret | String | 是   | 项目 API Secret              |
+| timeout   | int    | 否   | 请求超时时间（秒），默认 30  |
+| debug     | bool   | 否   | 是否开启调试模式，默认 false |
 
 ### FeedMatterUser
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| userId | String | 是 | 用户唯一标识 |
-| userName | String | 是 | 用户名称 |
-| userAvatar | String | 否 | 用户头像 URL |
+| 参数       | 类型   | 必填 | 说明         |
+| ---------- | ------ | ---- | ------------ |
+| userId     | String | 是   | 用户唯一标识 |
+| userName   | String | 是   | 用户名称     |
+| userAvatar | String | 否   | 用户头像 URL |
 
 ### ClientInfo
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| appVersionName | String | 是 | 应用版本名 |
-| appVersionCode | int | 是 | 应用版本号 |
-| appPackage | String | 是 | 应用包名 |
-| appType | String | 是 | 应用类型 |
-| deviceModel | String | 否 | 设备型号 |
-| deviceBrand | String | 否 | 设备品牌 |
-| deviceSysVersion | String | 否 | 系统版本名称 |
-| deviceSysVersionInt | String | 否 | 系统版本号 |
+| 参数                | 类型   | 必填 | 说明         |
+| ------------------- | ------ | ---- | ------------ |
+| appVersionName      | String | 是   | 应用版本名   |
+| appVersionCode      | int    | 是   | 应用版本号   |
+| appPackage          | String | 是   | 应用包名     |
+| appType             | String | 是   | 应用类型     |
+| deviceModel         | String | 否   | 设备型号     |
+| deviceBrand         | String | 否   | 设备品牌     |
+| deviceSysVersion    | String | 否   | 系统版本名称 |
+| deviceSysVersionInt | String | 否   | 系统版本号   |
 
 ### ProjectConfig
 
 项目配置信息模型。
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| feedbackPrompt | String? | 添加反馈时的提示词 |
-| commentPrompt | String? | 添加评论时的提示词 |
-| feedbackAttachmentEnabled | bool | 反馈是否支持附件 |
-| commentAttachmentEnabled | bool | 评论是否支持附件 |
-| callbackUrl | String? | 回调URL |
-| callbackToken | String? | 回调Token |
-| callbackEnabled | bool | 是否启用回调 |
+| 字段                      | 类型    | 默认值 | 说明                       |
+| ------------------------- | ------- | ------ | -------------------------- |
+| feedbackPrompt            | String? | null   | 添加反馈时的提示词         |
+| commentPrompt             | String? | null   | 添加评论时的提示词         |
+| feedbackEnabled           | bool    | true   | 是否允许发布反馈           |
+| commentEnabled            | bool    | true   | 是否允许发布评论           |
+| feedbackAttachmentEnabled | bool    | true   | 反馈是否支持附件           |
+| commentAttachmentEnabled  | bool    | true   | 评论是否支持附件           |
+| guestFeedbackEnabled      | bool    | false  | 未登录用户是否可以发布反馈 |
+| guestCommentEnabled       | bool    | false  | 未登录用户是否可以发布评论 |
+| maxContentLength          | int     | 1000   | 最大内容长度               |
+| maxAttachments            | int     | 8      | 最大附件数量               |
+| maxUploadFileSize         | int     | 10MB   | 最大上传文件大小           |
+
+```
 
 ## 数据模型
 
@@ -360,101 +452,101 @@ try {
 
 反馈信息模型。
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | String | 反馈 ID |
-| content | String | 反馈内容 |
-| status | String | 反馈状态（PENDING/OPEN/IN_PROGRESS/RESOLVED/CLOSED/DELETED） |
-| author | Author | 作者信息 |
-| attachments | List<Attachment>? | 附件列表 |
-| isPinned | bool | 是否置顶 |
-| commentCount | int | 评论数量 |
-| readCount | int | 阅读数量 |
-| createdAt | DateTime | 创建时间 |
-| updatedAt | DateTime | 更新时间 |
-| clientInfo | Map<String, dynamic>? | 客户端信息（设备、系统、应用版本等） |
-| customInfo | Map<String, dynamic>? | 自定义信息（由开发者定义） |
-| mark | FeedbackMark? | 标记信息 |
+| 字段         | 类型                  | 说明                                                         |
+| ------------ | --------------------- | ------------------------------------------------------------ |
+| id           | String                | 反馈 ID                                                      |
+| content      | String                | 反馈内容                                                     |
+| status       | String                | 反馈状态（PENDING/OPEN/IN_PROGRESS/RESOLVED/CLOSED/DELETED） |
+| author       | Author                | 作者信息                                                     |
+| attachments  | List<Attachment>?     | 附件列表                                                     |
+| isPinned     | bool                  | 是否置顶                                                     |
+| commentCount | int                   | 评论数量                                                     |
+| readCount    | int                   | 阅读数量                                                     |
+| createdAt    | DateTime              | 创建时间                                                     |
+| updatedAt    | DateTime              | 更新时间                                                     |
+| clientInfo   | Map<String, dynamic>? | 客户端信息（设备、系统、应用版本等）                         |
+| customInfo   | Map<String, dynamic>? | 自定义信息（由开发者定义）                                   |
+| mark         | FeedbackMark?         | 标记信息                                                     |
 
 ### Comment
 
 评论信息模型。
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | String | 评论 ID |
-| content | String | 评论内容 |
-| author | Author | 作者信息 |
-| parentId | String? | 父评论 ID（用于回复） |
-| isPinned | bool | 是否置顶 |
-| replyCount | int | 回复数量 |
-| createdAt | DateTime | 创建时间 |
-| updatedAt | DateTime | 更新时间 |
-| status | String | 评论状态 |
-| mark | CommentMark? | 标记信息 |
+| 字段       | 类型         | 说明                  |
+| ---------- | ------------ | --------------------- |
+| id         | String       | 评论 ID               |
+| content    | String       | 评论内容              |
+| author     | Author       | 作者信息              |
+| parentId   | String?      | 父评论 ID（用于回复） |
+| isPinned   | bool         | 是否置顶              |
+| replyCount | int          | 回复数量              |
+| createdAt  | DateTime     | 创建时间              |
+| updatedAt  | DateTime     | 更新时间              |
+| status     | String       | 评论状态              |
+| mark       | CommentMark? | 标记信息              |
 
 ### Author
 
 用户信息模型。
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | String | 用户 ID |
-| username | String | 用户名 |
-| avatar | String? | 头像 URL |
+| 字段     | 类型    | 说明     |
+| -------- | ------- | -------- |
+| id       | String  | 用户 ID  |
+| username | String  | 用户名   |
+| avatar   | String? | 头像 URL |
 
 ### Attachment
 
 附件信息模型。
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | String | 附件 ID |
-| fileName | String | 文件名 |
-| fileUrl | String | 文件 URL |
-| fileType | String | 文件类型 |
+| 字段      | 类型     | 说明     |
+| --------- | -------- | -------- |
+| id        | String   | 附件 ID  |
+| fileName  | String   | 文件名   |
+| fileUrl   | String   | 文件 URL |
+| fileType  | String   | 文件类型 |
 | createdAt | DateTime | 创建时间 |
 
 ### FeedbackMark
 
 反馈标记信息模型。
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
+| 字段    | 类型 | 说明                 |
+| ------- | ---- | -------------------- |
 | isAdmin | bool | 是否管理员发布的反馈 |
 
 ### CommentMark
 
 评论标记信息模型。
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
+| 字段         | 类型 | 说明           |
+| ------------ | ---- | -------------- |
 | isAdminReply | bool | 是否管理员回复 |
 
 ## 状态码说明
 
 ### 反馈状态（FeedbackStatus）
 
-| 状态 | 说明 |
-|------|------|
-| PENDING | 审核中 |
-| OPEN | 已公开 |
+| 状态        | 说明   |
+| ----------- | ------ |
+| PENDING     | 审核中 |
+| OPEN        | 已公开 |
 | IN_PROGRESS | 处理中 |
-| RESOLVED | 已解决 |
-| CLOSED | 已关闭 |
-| DELETED | 已删除 |
+| RESOLVED    | 已解决 |
+| CLOSED      | 已关闭 |
+| DELETED     | 已删除 |
 
 ### 错误码
 
-| 错误码 | 说明 |
-|--------|------|
-| CONFIG_NOT_SET | 配置未设置 |
-| INVALID_API_KEY | API Key 无效 |
-| FORBIDDEN | 没有权限 |
-| NOT_FOUND | 资源不存在 |
-| NETWORK_ERROR | 网络错误 |
-| SERVER_ERROR | 服务器错误 |
-| BAD_REQUEST | 请求参数错误 |
+| 错误码              | 说明         |
+| ------------------- | ------------ |
+| CONFIG_NOT_SET      | 配置未设置   |
+| INVALID_API_KEY     | API Key 无效 |
+| FORBIDDEN           | 没有权限     |
+| NOT_FOUND           | 资源不存在   |
+| NETWORK_ERROR       | 网络错误     |
+| SERVER_ERROR        | 服务器错误   |
+| BAD_REQUEST         | 请求参数错误 |
 | RATE_LIMIT_EXCEEDED | 请求频率超限 |
 
 ## 示例项目
@@ -470,18 +562,20 @@ MIT License
 FeedMatter SDK 支持通过特殊的 URL Schema 来展示富媒体卡片。格式如下：
 
 ```
+
 actioncard://fm.com/?logo=LOGO_URL&appname=APP_NAME&title=TITLE&desc=DESCRIPTION&image=IMAGE_URL
-```
+
+````
 
 ### 参数说明
 
-| 参数 | 必填 | 说明 |
-|------|------|------|
-| logo | 否 | 应用/平台图标 URL |
-| appname | 否 | 应用/平台名称 |
-| title | 是 | 卡片标题 |
-| desc | 否 | 卡片描述文本 |
-| image | 否 | 预览图 URL |
+| 参数    | 必填 | 说明              |
+| ------- | ---- | ----------------- |
+| logo    | 否   | 应用/平台图标 URL |
+| appname | 否   | 应用/平台名称     |
+| title   | 是   | 卡片标题          |
+| desc    | 否   | 卡片描述文本      |
+| image   | 否   | 预览图 URL        |
 
 ### 示例
 
@@ -500,11 +594,12 @@ final url = 'actioncard://fm.com/?'
     'title=这是一篇公众号文章&'
     'desc=点击阅读全文&'
     'image=https://example.com/preview.jpg';
-```
+````
 
 ### 卡片展示效果
 
 卡片包含以下元素：
+
 1. 左侧显示应用图标（logo），如果未提供则显示默认图标
 2. 中间显示应用名称（appname）和标题（title），以及可选的描述文本（desc）
 3. 右侧显示可选的预览图（image）
@@ -513,6 +608,7 @@ final url = 'actioncard://fm.com/?'
 ### 使用场景
 
 ActionCard 适用于以下场景：
+
 1. 展示第三方平台的内容预览
 2. 统一不同平台的链接展示样式
 3. 提供更丰富的视觉信息和交互体验
