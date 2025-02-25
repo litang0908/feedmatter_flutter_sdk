@@ -219,6 +219,26 @@ class FeedMatterClient {
   Future<T> _handleResponse<T>(Future<Response<T>> Function() request) async {
     try {
       final response = await request();
+      // 处理新的响应格式
+      if (response.data is Map) {
+        final Map<String, dynamic> data = response.data as Map<String, dynamic>;
+        // 检查是否是新的统一响应格式
+        if (data.containsKey('code') && data.containsKey('data')) {
+          // 检查状态码
+          final int code = data['code'] as int;
+          if (code != 200) {
+            final String message = data['message'] as String? ?? '未知错误';
+            throw FeedMatterApiException(
+              message,
+              statusCode: code,
+              code: code.toString(),
+            );
+          }
+          // 返回 data 字段的内容
+          return data['data'] as T;
+        }
+      }
+      // 如果不是新格式，直接返回原始数据
       return response.data as T;
     } on DioException catch (e) {
       if (e.error is FeedMatterException) {
@@ -239,7 +259,7 @@ class FeedMatterClient {
     final response = await _handleResponse(
       () => _request(
         'POST',
-        '/api/v1/feedbacks',
+        '/api/v2/feedbacks',
         data: {
           'content': content,
           if (type != null) 'type': type.value,
@@ -262,7 +282,7 @@ class FeedMatterClient {
     final response = await _handleResponse(
       () => _request(
         'GET',
-        '/api/v1/feedbacks',
+        '/api/v2/feedbacks',
         queryParameters: {
           'page': page,
           'size': size,
@@ -283,7 +303,7 @@ class FeedMatterClient {
   }) async {
     final response = await _handleResponse(() => _request(
           'GET',
-          '/api/v1/feedbacks/my',
+          '/api/v2/feedbacks/my',
           queryParameters: {
             'page': page,
             'size': size,
@@ -304,7 +324,7 @@ class FeedMatterClient {
   }) async {
     final response = await _handleResponse(() => _request(
           'GET',
-          '/api/v1/feedbacks/user/$userId',
+          '/api/v2/feedbacks/user/$userId',
           queryParameters: {
             'page': page,
             'size': size,
@@ -319,7 +339,7 @@ class FeedMatterClient {
   Future<Feedback> getFeedback(String id) async {
     return _handleResponse(() => _request(
           'GET',
-          '/api/v1/feedbacks/$id',
+          '/api/v2/feedbacks/$id',
         )).then((json) => Feedback.fromJson(json));
   }
 
@@ -340,7 +360,7 @@ class FeedMatterClient {
 
     return _handleResponse(() => _request(
           'POST',
-          '/api/v1/feedbacks/$feedbackId/comments',
+          '/api/v2/feedbacks/$feedbackId/comments',
           data: data,
         )).then((json) => Comment.fromJson(json));
   }
@@ -353,7 +373,7 @@ class FeedMatterClient {
   }) async {
     final response = await _handleResponse(() => _request(
           'GET',
-          '/api/v1/feedbacks/$feedbackId/comments',
+          '/api/v2/feedbacks/$feedbackId/comments',
           queryParameters: {
             'page': page,
             'size': size,
@@ -418,7 +438,7 @@ class FeedMatterClient {
 
     final response = await _handleResponse(() => _request(
           'POST',
-          '/api/v1/upload/public',
+          '/api/v2/upload/public',
           data: formData,
         ));
 
@@ -439,7 +459,7 @@ class FeedMatterClient {
 
     final response = await _handleResponse(() => _request(
           'POST',
-          '/api/v1/upload/private',
+          '/api/v2/upload/private',
           data: formData,
         ));
 
@@ -450,7 +470,7 @@ class FeedMatterClient {
   Future<String> getSignedUrl(String key) async {
     final response = await _handleResponse(() => _request(
           'GET',
-          '/api/v1/upload/private/$key',
+          '/api/v2/upload/private/$key',
         ));
     return response['url'];
   }
@@ -459,7 +479,7 @@ class FeedMatterClient {
   /// 返回更新后的反馈信息
   Future<Feedback> toggleLike(String feedbackId) async {
     final response = await _handleResponse(
-      () => _request('POST', '/api/v1/feedbacks/$feedbackId/like'),
+      () => _request('POST', '/api/v2/feedbacks/$feedbackId/like'),
     );
     return Feedback.fromJson(response);
   }
@@ -469,7 +489,7 @@ class FeedMatterClient {
     final response = await _handleResponse(
       () => _request(
         'GET',
-        '/api/v1/projects/config',
+        '/api/v2/projects/config',
       ),
     );
     return ProjectConfig.fromJson(response);
@@ -563,5 +583,4 @@ class FeedMatterClient {
   static String getImageThumbnailUrl(String url) => "$url$_imageStyleSmall240";
 
   static String getImageOriginalUrl(String url) => "$url$_imageStyleOriginal";
-
 }

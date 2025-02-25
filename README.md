@@ -260,7 +260,7 @@ SDK 提供了安全的文件上传功能，包括以下特性：
 - 文件大小限制（默认最大 10MB）
 - 文件名安全处理
 - 支持公开和私密两种上传方式
-- RESTful API 路径：`/api/v1/upload`
+- RESTful API 路径：`/api/v2/upload`
 
 ### 上传公开文件
 
@@ -299,16 +299,16 @@ try {
 
 ### API 端点
 
-- 上传公开文件：POST `/api/v1/upload/public`
-- 上传私密文件：POST `/api/v1/upload/private`
-- 获取签名 URL：GET `/api/v1/upload/private/{key}`
-- 获取项目配置：GET `/api/v1/projects/config`
-- 创建反馈：POST `/api/v1/feedbacks`
-- 获取反馈列表：GET `/api/v1/feedbacks`
-- 获取反馈详情：GET `/api/v1/feedbacks/{id}`
-- 获取评论列表：GET `/api/v1/feedbacks/{id}/comments`
-- 添加评论：POST `/api/v1/feedbacks/{id}/comments`
-- 切换点赞：POST `/api/v1/feedbacks/{id}/like`
+- 上传公开文件：POST `/api/v2/upload/public`
+- 上传私密文件：POST `/api/v2/upload/private`
+- 获取签名 URL：GET `/api/v2/upload/private/{key}`
+- 获取项目配置：GET `/api/v2/projects/config`
+- 创建反馈：POST `/api/v2/feedbacks`
+- 获取反馈列表：GET `/api/v2/feedbacks`
+- 获取反馈详情：GET `/api/v2/feedbacks/{id}`
+- 获取评论列表：GET `/api/v2/feedbacks/{id}/comments`
+- 添加评论：POST `/api/v2/feedbacks/{id}/comments`
+- 切换点赞：POST `/api/v2/feedbacks/{id}/like`
 
 ## 错误处理
 
@@ -444,7 +444,22 @@ try {
 | maxAttachments            | int     | 8      | 最大附件数量               |
 | maxUploadFileSize         | int     | 10MB   | 最大上传文件大小           |
 
+## 响应格式
+
+FeedMatter API 使用统一的响应格式：
+
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": {
+    // 实际的业务数据
+  },
+  "timestamp": "2023-05-01 12:34:56"
+}
 ```
+
+SDK 会自动处理这种响应格式，提取 `data` 字段的内容，并处理错误码。您不需要手动处理这些细节。
 
 ## 数据模型
 
@@ -565,7 +580,7 @@ FeedMatter SDK 支持通过特殊的 URL Schema 来展示富媒体卡片。格�
 
 actioncard://fm.com/?logo=LOGO_URL&appname=APP_NAME&title=TITLE&desc=DESCRIPTION&image=IMAGE_URL
 
-````
+```
 
 ### 参数说明
 
@@ -594,7 +609,7 @@ final url = 'actioncard://fm.com/?'
     'title=这是一篇公众号文章&'
     'desc=点击阅读全文&'
     'image=https://example.com/preview.jpg';
-````
+```
 
 ### 卡片展示效果
 
