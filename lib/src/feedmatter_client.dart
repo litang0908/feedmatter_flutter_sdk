@@ -44,11 +44,10 @@ class FeedMatterClient {
     return _instance!;
   }
 
-  void init(
-    FeedMatterConfig config,
-    FeedMatterUser user, {
-    void Function(FeedMatterException)? onError,
-  }) {
+  void init(FeedMatterConfig config,
+      FeedMatterUser user, {
+        void Function(FeedMatterException)? onError,
+      }) {
     this.config = config;
     _user = user;
     this.onError = onError;
@@ -111,16 +110,16 @@ class FeedMatterClient {
 
           final error = response.statusCode == 401 || response.statusCode == 403
               ? FeedMatterAuthException(
-                  message,
-                  code: code,
-                  originalError: errorBody,
-                )
+            message,
+            code: code,
+            originalError: errorBody,
+          )
               : FeedMatterApiException(
-                  message,
-                  statusCode: response.statusCode,
-                  code: code,
-                  originalError: errorBody,
-                );
+            message,
+            statusCode: response.statusCode,
+            code: code,
+            originalError: errorBody,
+          );
 
           onError?.call(error);
           handler.reject(DioException(
@@ -257,18 +256,19 @@ class FeedMatterClient {
   }) async {
     final clientInfo = await _getClientInfo();
     final response = await _handleResponse(
-      () => _request(
-        'POST',
-        '/api/v2/feedbacks',
-        data: {
-          'content': content,
-          if (type != null) 'type': type.value,
-          'clientInfo': clientInfo.toJson(),
-          if (customInfo != null) 'customInfo': customInfo,
-          if (attachments != null && attachments.isNotEmpty)
-            'attachments': attachments.map((a) => a.toJson()).toList(),
-        },
-      ),
+          () =>
+          _request(
+            'POST',
+            '/api/v2/feedbacks',
+            data: {
+              'content': content,
+              if (type != null) 'type': type.value,
+              'clientInfo': clientInfo.toJson(),
+              if (customInfo != null) 'customInfo': customInfo,
+              if (attachments != null && attachments.isNotEmpty)
+                'attachments': attachments.map((a) => a.toJson()).toList(),
+            },
+          ),
     );
 
     return Feedback.fromJson(response);
@@ -280,18 +280,18 @@ class FeedMatterClient {
     String? keyword,
   }) async {
     final response = await _handleResponse(
-      () => _request(
-        'GET',
-        '/api/v2/feedbacks',
-        queryParameters: {
-          'page': page,
-          'size': size,
-          if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
-        },
-      ),
+          () =>
+          _request(
+            'GET',
+            '/api/v2/feedbacks',
+            queryParameters: {
+              'page': page,
+              'size': size,
+              if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
+            },
+          ),
     );
-
-    return (response['content'] as List)
+    return (response as List)
         .map((item) => Feedback.fromJson(item))
         .toList();
   }
@@ -301,7 +301,8 @@ class FeedMatterClient {
     int size = 20,
     String? keyword,
   }) async {
-    final response = await _handleResponse(() => _request(
+    final response = await _handleResponse(() =>
+        _request(
           'GET',
           '/api/v2/feedbacks/my',
           queryParameters: {
@@ -311,18 +312,18 @@ class FeedMatterClient {
           },
         ));
 
-    return (response['content'] as List)
+    return (response as List)
         .map((item) => Feedback.fromJson(item))
         .toList();
   }
 
   /// 获取指定用户的反馈列表
-  Future<List<Feedback>> getUserFeedbacks(
-    String userId, {
+  Future<List<Feedback>> getUserFeedbacks(String userId, {
     int page = 0,
     int size = 20,
   }) async {
-    final response = await _handleResponse(() => _request(
+    final response = await _handleResponse(() =>
+        _request(
           'GET',
           '/api/v2/feedbacks/user/$userId',
           queryParameters: {
@@ -330,25 +331,25 @@ class FeedMatterClient {
             'size': size,
           },
         ));
-
-    return (response['content'] as List)
+    return (response as List)
         .map((item) => Feedback.fromJson(item))
         .toList();
   }
 
+  /// 获取反馈详情
   Future<Feedback> getFeedback(String id) async {
-    return _handleResponse(() => _request(
+    return _handleResponse(() =>
+        _request(
           'GET',
           '/api/v2/feedbacks/$id',
         )).then((json) => Feedback.fromJson(json));
   }
 
-  Future<Comment> createComment(
-    String feedbackId,
-    String content, {
-    List<Attachment>? attachments,
-    String? parentCommentId,
-  }) async {
+  Future<Comment> createComment(String feedbackId,
+      String content, {
+        List<Attachment>? attachments,
+        String? parentCommentId,
+      }) async {
     final clientInfo = await _getClientInfo();
     final Map<String, dynamic> data = {
       'content': content,
@@ -358,20 +359,21 @@ class FeedMatterClient {
       if (parentCommentId?.isNotEmpty ?? false) 'parentId': parentCommentId!,
     };
 
-    return _handleResponse(() => _request(
+    return _handleResponse(() =>
+        _request(
           'POST',
           '/api/v2/feedbacks/$feedbackId/comments',
           data: data,
         )).then((json) => Comment.fromJson(json));
   }
 
-  Future<List<Comment>> getComments(
-    String feedbackId, {
+  Future<List<Comment>> getComments(String feedbackId, {
     int page = 0,
     int size = 20,
     String? sortBy,
   }) async {
-    final response = await _handleResponse(() => _request(
+    final response = await _handleResponse(() =>
+        _request(
           'GET',
           '/api/v2/feedbacks/$feedbackId/comments',
           queryParameters: {
@@ -381,7 +383,7 @@ class FeedMatterClient {
           },
         ));
 
-    return (response['content'] as List)
+    return (response as List)
         .map((item) => Comment.fromJson(item))
         .toList();
   }
@@ -417,7 +419,9 @@ class FeedMatterClient {
 
     // 如果文件名为空，生成随机文件名
     if (name.isEmpty) {
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final timestamp = DateTime
+          .now()
+          .millisecondsSinceEpoch;
       return 'file_$timestamp';
     }
 
@@ -436,7 +440,8 @@ class FeedMatterClient {
       ),
     });
 
-    final response = await _handleResponse(() => _request(
+    final response = await _handleResponse(() =>
+        _request(
           'POST',
           '/api/v2/upload/public',
           data: formData,
@@ -457,7 +462,8 @@ class FeedMatterClient {
       ),
     });
 
-    final response = await _handleResponse(() => _request(
+    final response = await _handleResponse(() =>
+        _request(
           'POST',
           '/api/v2/upload/private',
           data: formData,
@@ -468,7 +474,8 @@ class FeedMatterClient {
 
   /// 获取私密文件的签名URL
   Future<String> getSignedUrl(String key) async {
-    final response = await _handleResponse(() => _request(
+    final response = await _handleResponse(() =>
+        _request(
           'GET',
           '/api/v2/upload/private/$key',
         ));
@@ -479,7 +486,7 @@ class FeedMatterClient {
   /// 返回更新后的反馈信息
   Future<Feedback> toggleLike(String feedbackId) async {
     final response = await _handleResponse(
-      () => _request('POST', '/api/v2/feedbacks/$feedbackId/like'),
+          () => _request('POST', '/api/v2/feedbacks/$feedbackId/like'),
     );
     return Feedback.fromJson(response);
   }
@@ -487,10 +494,11 @@ class FeedMatterClient {
   /// Get project configuration
   Future<ProjectConfig> getProjectConfig() async {
     final response = await _handleResponse(
-      () => _request(
-        'GET',
-        '/api/v2/projects/config',
-      ),
+          () =>
+          _request(
+            'GET',
+            '/api/v2/projects/config',
+          ),
     );
     return ProjectConfig.fromJson(response);
   }
@@ -533,13 +541,15 @@ class FeedMatterClient {
     return base64.encode(digest.bytes);
   }
 
-  Future<Response> _request(
-    String method,
-    String path, {
-    Object? data,
-    Map<String, dynamic>? queryParameters,
-  }) {
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+  Future<Response> _request(String method,
+      String path, {
+        Object? data,
+        Map<String, dynamic>? queryParameters,
+      }) {
+    final timestamp = DateTime
+        .now()
+        .millisecondsSinceEpoch
+        .toString();
 
     // 根据请求类型选择要签名的参数
     Map<String, dynamic>? signParams;
