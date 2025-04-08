@@ -471,7 +471,7 @@ SDK 会自动处理这种响应格式，提取 `data` 字段的内容，并处�
 | ------------ | --------------------- | ------------------------------------------------------------ |
 | id           | String                | 反馈 ID                                                      |
 | content      | String                | 反馈内容                                                     |
-| status       | String                | 反馈状态（PENDING/OPEN/IN_PROGRESS/RESOLVED/CLOSED/DELETED） |
+| status       | String                | 反馈状态（PENDING/IN_PROGRESS/RESOLVED/DELETED） |
 | author       | Author                | 作者信息                                                     |
 | attachments  | List<Attachment>?     | 附件列表                                                     |
 | isPinned     | bool                  | 是否置顶                                                     |
@@ -545,10 +545,8 @@ SDK 会自动处理这种响应格式，提取 `data` 字段的内容，并处�
 | 状态        | 说明   |
 | ----------- | ------ |
 | PENDING     | 审核中 |
-| OPEN        | 已公开 |
 | IN_PROGRESS | 处理中 |
 | RESOLVED    | 已解决 |
-| CLOSED      | 已关闭 |
 | DELETED     | 已删除 |
 
 ### 错误码
