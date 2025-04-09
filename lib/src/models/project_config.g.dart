@@ -18,9 +18,10 @@ ProjectConfig _$ProjectConfigFromJson(Map<String, dynamic> json) =>
           json['commentAttachmentEnabled'] as bool? ?? true,
       guestFeedbackEnabled: json['guestFeedbackEnabled'] as bool? ?? false,
       guestCommentEnabled: json['guestCommentEnabled'] as bool? ?? false,
-      maxContentLength: json['maxContentLength'] as int? ?? 1000,
-      maxAttachments: json['maxAttachments'] as int? ?? 8,
-      maxUploadFileSize: json['maxUploadFileSize'] as int? ?? 10 * 1024 * 1024,
+      maxContentLength: (json['maxContentLength'] as num?)?.toInt() ?? 1000,
+      maxAttachments: (json['maxAttachments'] as num?)?.toInt() ?? 8,
+      maxUploadFileSize:
+          (json['maxUploadFileSize'] as num?)?.toInt() ?? 10 * 1024 * 1024,
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
     );

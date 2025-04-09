@@ -23,6 +23,7 @@ const _$FileTypeEnumMap = {
   FileType.img: 'IMG',
   FileType.vid: 'VID',
   FileType.doc: 'DOC',
+  FileType.txt: 'TXT',
   FileType.fref: 'FREF',
   FileType.cref: 'CREF',
 };

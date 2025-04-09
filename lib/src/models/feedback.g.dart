@@ -56,10 +56,8 @@ Map<String, dynamic> _$FeedbackToJson(Feedback instance) => <String, dynamic>{
 
 const _$FeedbackStatusEnumMap = {
   FeedbackStatus.pending: 'PENDING',
-  FeedbackStatus.open: 'OPEN',
   FeedbackStatus.inProgress: 'IN_PROGRESS',
   FeedbackStatus.resolved: 'RESOLVED',
-  FeedbackStatus.closed: 'CLOSED',
   FeedbackStatus.hidden: 'HIDDEN',
   FeedbackStatus.deleted: 'DELETED',
 };
