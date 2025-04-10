@@ -89,19 +89,34 @@ class FeedMatterClient {
       onError: (DioException e, handler) {
         if (e.response != null) {
           final response = e.response!;
-          Map<String, dynamic> errorBody;
-          try {
-            errorBody = response.data as Map<String, dynamic>;
-          } catch (_) {
-            errorBody = {'message': response.data?.toString() ?? '未知错误'};
-          }
+          Map<String, dynamic> errorBody = {};
+          String message = '请求失败';
+          String? code;
 
-          final message = errorBody['message'] as String? ?? '请求失败';
-          final code = errorBody['code'] as String?;
+          try {
+            // 尝试将响应解析为 JSON
+            if (response.data is Map) {
+              errorBody = response.data as Map<String, dynamic>;
+              message = errorBody['message'] as String? ?? '请求失败';
+              code = errorBody['code'] as String?;
+            } else if (response.data is String) {
+              // 处理响应为普通字符串的情况（通常是服务器的错误堆栈）
+              final String responseText = response.data as String;
+              // 对于其他类型的错误，保存原始响应文本
+              message = response.statusCode == 500 ? '服务器内部错误' : '请求失败';
+              errorBody = {'message': message, 'rawResponse': responseText};
+            }
+          } catch (extractionError) {
+            if (config?.debug ?? false) {
+              print('Error extracting error details: $extractionError');
+            }
+            errorBody = {'message': message, 'originalError': e.toString()};
+          }
 
           if (config?.debug ?? false) {
             print('FeedMatter API Error:');
             print('Status Code: ${response.statusCode}');
+            print('Error Message: $message');
             print('Headers: ${response.requestOptions.headers}');
             print('URL: ${response.requestOptions.uri}');
             print('Method: ${response.requestOptions.method}');
