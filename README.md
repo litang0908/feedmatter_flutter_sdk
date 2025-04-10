@@ -328,6 +328,7 @@ SDK 定义了以下几种异常类型：
    - 网络错误
    - 服务器错误
    - 请求参数错误
+   - 业务规则校验失败（如项目已关闭评论功能）
 
 你可以通过以下两种方式处理错误：
 
@@ -351,13 +352,44 @@ client.init(
 
 ```dart
 try {
-  await client.createFeedback(content: '反馈内容');
+  await client.createComment(feedbackId, '评论内容');
 } on FeedMatterAuthException catch (e) {
   // 处理认证错误
+  print('认证错误: ${e.message}, 错误码: ${e.code}');
 } on FeedMatterApiException catch (e) {
-  // 处理 API 错误
+  // 检查是否是业务规则校验失败（如项目已关闭评论功能）
+  if (e.isBusinessRuleViolation) {
+    print('业务规则校验失败: ${e.message}');
+    // 向用户显示具体的错误信息，例如 "该项目已关闭评论功能"
+    showErrorDialog(e.message);
+  } else if (e.statusCode == 500) {
+    // 处理服务器错误
+    print('服务器错误: ${e.message}');
+    // 可以查看更多详细信息
+    print('错误堆栈: ${e.stackTrace}');
+    print('原始响应: ${e.rawResponse}');
+  } else {
+    // 处理其他 API 错误
+    print('API错误: ${e.message}, 状态码: ${e.statusCode}, 错误码: ${e.code}');
+  }
 }
 ```
+
+### 常见业务错误与处理方式
+
+SDK 会尝试解析服务器返回的错误信息，特别是对于业务规则校验失败的情况。以下是一些常见的业务错误和处理建议：
+
+| 错误信息 | 原因 | 处理建议 |
+|---------|------|---------|
+| "该项目已关闭评论功能" | 项目配置中禁用了评论功能 | 隐藏评论输入框，向用户展示相应提示 |
+| "未登录用户不能发布评论" | 项目不允许匿名评论 | 提示用户登录后再评论 |
+| "该项目已关闭评论附件功能" | 项目禁用了评论附件 | 隐藏附件上传按钮 |
+| "该反馈已关闭评论功能" | 特定反馈被关闭了评论 | 在此反馈下隐藏评论输入框 |
+| "文件大小超过限制" | 上传的文件超出大小限制 | 提示用户压缩文件或选择更小的文件 |
+| "附件数量超出限制" | 上传的附件数量超过限制 | 限制用户上传的附件数量 |
+
+SDK 将这些业务规则校验错误统一标记为 `code: 'INVALID_STATE'`，状态码通常为 400，
+可以通过 `isBusinessRuleViolation` 属性快速判断是否属于此类错误。
 
 ## 最佳实践
 
