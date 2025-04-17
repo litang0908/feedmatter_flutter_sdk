@@ -169,7 +169,13 @@ class FeedMatterClient {
     _dio?.options.headers.remove('X-User-Avatar');
   }
 
-  String _getAppType() => Platform.operatingSystem.toUpperCase();
+  String _getAppType() {
+    var value = Platform.operatingSystem.toUpperCase();
+    if (value == 'OHOS') {
+      return 'HARMONY';
+    }
+    return value;
+  }
 
   /// 获取设备和应用信息
   Future<ClientInfo> _getClientInfo() async {
