@@ -1,10 +1,10 @@
 name: feedmatter_flutter_sdk
 description: Flutter SDK for FeedMatter API, providing feedback collection and management features.
 version: 1.0.0
-homepage: https://github.com/litangtech/feedmatter_flutter_sdk
+homepage: https://github.com/litang0908/feedmatter_flutter_sdk
 
 environment:
-  sdk: '>=3.1.5 <4.0.0'
+  sdk: '>=2.19.6 <4.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
@@ -12,15 +12,21 @@ dependencies:
     sdk: flutter
   dio: ^5.7.0
   json_annotation: ^4.8.1
-  package_info_plus: ^8.0.2
-  device_info_plus: ^10.1.2
-  crypto: ^3.0.6
+  package_info_plus:
+    git:
+      url: "https://gitee.com/openharmony-sig/flutter_plus_plugins.git"
+      path: "packages/package_info_plus/package_info_plus"
+  device_info_plus:
+    git:
+      url: "https://gitee.com/openharmony-sig/flutter_plus_plugins.git"
+      path: "packages/device_info_plus/device_info_plus"
+  crypto: ^3.0.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^2.4.7
-  json_serializable: ^6.7.1
+  build_runner: ^2.3.3
+  json_serializable: ^6.6.2
   flutter_lints: ^2.0.0
 
 # For information on the generic Dart part of this file, see the
