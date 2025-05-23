@@ -14,11 +14,11 @@ dependencies:
   json_annotation: ^4.8.1
   package_info_plus:
     git:
-      url: "https://gitee.com/openharmony-sig/flutter_plus_plugins.git"
+      url: "https://gitcode.com/openharmony-sig/flutter_plus_plugins.git"
       path: "packages/package_info_plus/package_info_plus"
   device_info_plus:
     git:
-      url: "https://gitee.com/openharmony-sig/flutter_plus_plugins.git"
+      url: "https://gitcode.com/openharmony-sig/flutter_plus_plugins.git"
       path: "packages/device_info_plus/device_info_plus"
   crypto: ^3.0.3
 
