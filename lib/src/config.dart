@@ -8,6 +8,9 @@ class FeedMatterConfig {
   /// API Secret
   final String apiSecret;
 
+  /// 应用渠道
+  final String? appMarket;
+
   /// 是否启用调试模式
   final bool debug;
 
@@ -18,13 +21,14 @@ class FeedMatterConfig {
     this.baseUrl = 'https://fmapi.litangkj.com',
     required this.apiKey,
     required this.apiSecret,
+    this.appMarket,
     this.debug = false,
     this.timeout = 30,
   });
 
   @override
   String toString() {
-    return 'FeedMatterConfig(baseUrl: $baseUrl, apiKey: $apiKey, apiSecret: $apiSecret, debug: $debug, timeout: $timeout)';
+    return 'FeedMatterConfig(baseUrl: $baseUrl, apiKey: $apiKey, apiSecret: $apiSecret, appMarket: $appMarket, debug: $debug, timeout: $timeout)';
   }
 }
 

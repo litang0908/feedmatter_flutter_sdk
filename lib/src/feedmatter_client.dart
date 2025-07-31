@@ -213,6 +213,7 @@ class FeedMatterClient {
       appVersionName: packageInfo.version,
       appPackage: packageInfo.packageName,
       appType: _getAppType(),
+      appMarket: config?.appMarket,
       deviceModel: deviceModel,
       deviceBrand: deviceBrand,
       deviceSysVersion: deviceSysVersion,

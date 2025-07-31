@@ -9,6 +9,7 @@ class ClientInfo {
   final String appVersionName;
   final String appPackage;
   final String appType;
+  final String? appMarket; // 应用渠道
 
   //设备信息
   final String? deviceModel;
@@ -21,6 +22,7 @@ class ClientInfo {
     required this.appVersionName,
     required this.appPackage,
     required this.appType,
+    this.appMarket,
     this.deviceModel,
     this.deviceBrand,
     this.deviceSysVersion,
