@@ -28,8 +28,11 @@ class ProjectConfig {
   /// 未登录用户是否可以发布评论
   final bool guestCommentEnabled;
 
-  /// 最大内容长度
-  final int maxContentLength;
+  /// 反馈最大内容长度
+  final int feedbackMaxContentLength;
+
+  /// 评论最大内容长度
+  final int commentMaxContentLength;
 
   /// 最大附件数量
   final int maxAttachments;
@@ -52,7 +55,8 @@ class ProjectConfig {
     this.commentAttachmentEnabled = true,
     this.guestFeedbackEnabled = false,
     this.guestCommentEnabled = false,
-    this.maxContentLength = 1000,
+    this.feedbackMaxContentLength = 3000,
+    this.commentMaxContentLength = 3000,
     this.maxAttachments = 8,
     this.maxUploadFileSize = 10 * 1024 * 1024,
     this.createdAt,
@@ -75,7 +79,8 @@ class ProjectConfig {
         'commentAttachmentEnabled: $commentAttachmentEnabled, '
         'guestFeedbackEnabled: $guestFeedbackEnabled, '
         'guestCommentEnabled: $guestCommentEnabled, '
-        'maxContentLength: $maxContentLength, '
+        'feedbackMaxContentLength: $feedbackMaxContentLength, '
+        'commentMaxContentLength: $commentMaxContentLength, '
         'maxAttachments: $maxAttachments, '
         'maxUploadFileSize: $maxUploadFileSize, '
         'createdAt: $createdAt, '
