@@ -177,7 +177,8 @@ try {
   print('评论是否支持附件: ${config.commentAttachmentEnabled}');
   print('游客是否可以发布反馈: ${config.guestFeedbackEnabled}');
   print('游客是否可以发布评论: ${config.guestCommentEnabled}');
-  print('最大内容长度: ${config.maxContentLength}');
+  print('反馈最大内容长度: ${config.feedbackMaxContentLength}');
+  print('评论最大内容长度: ${config.commentMaxContentLength}');
   print('最大附件数量: ${config.maxAttachments}');
   print('最大文件大小: ${config.maxUploadFileSize}');
 } catch (e) {
@@ -197,7 +198,8 @@ try {
 | commentAttachmentEnabled  | bool    | true   | 评论是否支持附件           |
 | guestFeedbackEnabled      | bool    | false  | 未登录用户是否可以发布反馈 |
 | guestCommentEnabled       | bool    | false  | 未登录用户是否可以发布评论 |
-| maxContentLength          | int     | 1000   | 最大内容长度               |
+| feedbackMaxContentLength  | int     | 3000   | 反馈最大内容长度           |
+| commentMaxContentLength   | int     | 3000   | 评论最大内容长度           |
 | maxAttachments            | int     | 8      | 最大附件数量               |
 | maxUploadFileSize         | int     | 10MB   | 最大上传文件大小           |
 
@@ -231,9 +233,9 @@ try {
     feedbackInput.hint = config.feedbackPrompt;
   }
 
-  // 5. 检查内容长度
-  if (content.length > config.maxContentLength) {
-    showToast('内容超出长度限制');
+  // 5. 检查反馈内容长度
+  if (content.length > config.feedbackMaxContentLength) {
+    showToast('反馈内容超出长度限制');
     return;
   }
 
@@ -472,7 +474,8 @@ SDK 将这些业务规则校验错误统一标记为 `code: 'INVALID_STATE'`，�
 | commentAttachmentEnabled  | bool    | true   | 评论是否支持附件           |
 | guestFeedbackEnabled      | bool    | false  | 未登录用户是否可以发布反馈 |
 | guestCommentEnabled       | bool    | false  | 未登录用户是否可以发布评论 |
-| maxContentLength          | int     | 1000   | 最大内容长度               |
+| feedbackMaxContentLength  | int     | 3000   | 反馈最大内容长度           |
+| commentMaxContentLength   | int     | 3000   | 评论最大内容长度           |
 | maxAttachments            | int     | 8      | 最大附件数量               |
 | maxUploadFileSize         | int     | 10MB   | 最大上传文件大小           |
 
