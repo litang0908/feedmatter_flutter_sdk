@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:feedmatter_flutter_sdk/src/device_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'config.dart';
@@ -206,6 +207,12 @@ class FeedMatterClient {
       deviceBrand = 'Apple';
       deviceSysVersion = macOsInfo.osRelease;
       deviceSysVersionInt = macOsInfo.majorVersion.toString();
+    } else if (DeviceUtils.isOhos()) {
+      OhosDeviceInfo ohosDeviceInfo = await deviceInfoPlugin.ohosInfo;
+      deviceModel = ohosDeviceInfo.productModel;
+      deviceBrand = ohosDeviceInfo.brand;
+      deviceSysVersion = ohosDeviceInfo.displayVersion;
+      deviceSysVersionInt = "${ohosDeviceInfo.majorVersion ?? -1}";
     }
 
     return ClientInfo(
