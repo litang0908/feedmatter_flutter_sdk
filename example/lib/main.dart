@@ -1,4 +1,5 @@
-import 'package:feedmatter_flutter_sdk/feedmatter_flutter_sdk.dart' as feedmatter;
+import 'package:feedmatter_flutter_sdk/feedmatter_flutter_sdk.dart'
+    as feedmatter;
 import 'package:flutter/material.dart';
 
 void main() {
@@ -40,11 +41,13 @@ class _MyHomePageState extends State<MyHomePage> {
     // 初始化 SDK
     client = feedmatter.FeedMatterClient.instance;
     client.init(
-      feedmatter.FeedMatterConfig(
+      const feedmatter.FeedMatterConfig(
         baseUrl: 'https://fmapi.feedmatter.com',
         apiKey: 'your-api-key',
         timeout: 30,
         debug: true,
+        apiSecret: '',
+        appMarket: 'example',
       ),
       feedmatter.FeedMatterUser(
         userId: 'test-user-id',
@@ -93,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
         customInfo: {'source': 'example_app'},
       );
       _feedbackController.clear();
-      await _loadFeedbacks();  // 重新加载列表
+      await _loadFeedbacks(); // 重新加载列表
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('反馈提交成功')),
@@ -181,7 +184,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: [
                               IconButton(
                                 icon: Icon(
-                                  feedback.isLiked ? Icons.favorite : Icons.favorite_border,
+                                  feedback.isLiked
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
                                   color: feedback.isLiked ? Colors.red : null,
                                 ),
                                 onPressed: _isLoading
@@ -218,4 +223,4 @@ class _MyHomePageState extends State<MyHomePage> {
     _feedbackController.dispose();
     super.dispose();
   }
-} 
+}
