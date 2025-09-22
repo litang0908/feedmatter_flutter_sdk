@@ -21,7 +21,7 @@ class FeedMatterConfig {
     this.baseUrl = 'https://fmapi.litangkj.com',
     required this.apiKey,
     required this.apiSecret,
-    this.appMarket,
+    required this.appMarket,
     this.debug = false,
     this.timeout = 30,
   });
