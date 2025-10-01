@@ -148,6 +148,8 @@ final myFeedbacks = await client.getMyFeedbacks(
 
 ### 6. 评论功能
 
+#### 6.1 添加评论
+
 ```dart
 // 添加评论
 final comment = await client.createComment(
@@ -155,13 +157,83 @@ final comment = await client.createComment(
   '这是一条评论',    // 评论内容
 );
 
-// 获取评论列表
-final comments = await client.getComments(
+// 添加回复（回复某条评论）
+final reply = await client.createComment(
+  'feedback-id',          // 反馈 ID
+  '回复内容',              // 评论内容
+  parentCommentId: 'comment-id',  // 父评论 ID
+);
+```
+
+#### 6.2 获取评论列表（楼中楼格式）
+
+**推荐使用**楼中楼格式获取评论，这种方式将主评论和回复分开展示，支持独立翻页：
+
+```dart
+// 获取主评论列表（楼中楼格式）
+final mainComments = await client.getCommentsFloor(
   'feedback-id',
   page: 0,
   size: 20,
+  sort: 'created_asc',  // 排序方式：created_asc（默认）, created_desc, reply_desc
 );
+
+// 每个主评论包含：
+// - 评论基本信息（内容、作者、时间等）
+// - 回复的分页数据（前N条回复 + 分页信息）
+for (var mainComment in mainComments) {
+  print('主评论: ${mainComment.content}');
+  print('回复数: ${mainComment.replies.totalElements}');
+  
+  // 首次加载时自动包含的回复
+  for (var reply in mainComment.replies.content) {
+    print('  回复: ${reply.content}');
+  }
+  
+  // 检查是否还有更多回复
+  if (mainComment.replies.hasNext) {
+    // 加载更多回复
+    final moreReplies = await client.getCommentReplies(
+      mainComment.id,
+      page: 1,
+      size: 10,
+    );
+  }
+}
 ```
+
+#### 6.3 获取回复列表（分页）
+
+当需要加载某个主评论的更多回复时：
+
+```dart
+// 获取某个主评论的回复（分页）
+final pagedReplies = await client.getCommentReplies(
+  'main-comment-id',
+  page: 0,
+  size: 10,
+);
+
+print('回复列表:');
+for (var reply in pagedReplies.content) {
+  print('- ${reply.author.username}: ${reply.content}');
+}
+
+print('总回复数: ${pagedReplies.totalElements}');
+print('当前页: ${pagedReplies.currentPage}');
+print('总页数: ${pagedReplies.totalPages}');
+print('是否有下一页: ${pagedReplies.hasNext}');
+```
+
+#### 排序选项
+
+楼中楼评论支持以下排序方式：
+
+- `created_asc`: 按创建时间升序（默认，最早的在前）
+- `created_desc`: 按创建时间降序（最新的在前）
+- `reply_desc`: 按回复数降序（回复最多的在前）
+
+注意：所有排序都会优先显示置顶评论
 
 ### 7. 项目配置
 
@@ -301,16 +373,24 @@ try {
 
 ### API 端点
 
+#### 文件上传
 - 上传公开文件：POST `/api/v2/upload/public`
 - 上传私密文件：POST `/api/v2/upload/private`
 - 获取签名 URL：GET `/api/v2/upload/private/{key}`
+
+#### 项目配置
 - 获取项目配置：GET `/api/v2/projects/config`
+
+#### 反馈
 - 创建反馈：POST `/api/v2/feedbacks`
 - 获取反馈列表：GET `/api/v2/feedbacks`
 - 获取反馈详情：GET `/api/v2/feedbacks/{id}`
-- 获取评论列表：GET `/api/v2/feedbacks/{id}/comments`
-- 添加评论：POST `/api/v2/feedbacks/{id}/comments`
 - 切换点赞：POST `/api/v2/feedbacks/{id}/like`
+
+#### 评论
+- 获取评论列表（楼中楼）：GET `/api/v2/feedbacks/{id}/comments/floor`
+- 获取回复列表（分页）：GET `/api/v2/feedbacks/comments/{mainCommentId}/replies`
+- 添加评论/回复：POST `/api/v2/feedbacks/{id}/comments`
 
 ## 错误处理
 
@@ -522,18 +602,52 @@ SDK 会自动处理这种响应格式，提取 `data` 字段的内容，并处�
 
 评论信息模型。
 
-| 字段       | 类型         | 说明                  |
-| ---------- | ------------ | --------------------- |
-| id         | String       | 评论 ID               |
-| content    | String       | 评论内容              |
-| author     | Author       | 作者信息              |
-| parentId   | String?      | 父评论 ID（用于回复） |
-| isPinned   | bool         | 是否置顶              |
-| replyCount | int          | 回复数量              |
-| createdAt  | DateTime     | 创建时间              |
-| updatedAt  | DateTime     | 更新时间              |
-| status     | String       | 评论状态              |
-| mark       | CommentMark? | 标记信息              |
+| 字段            | 类型         | 说明                         |
+| --------------- | ------------ | ---------------------------- |
+| id              | String       | 评论 ID                      |
+| content         | String       | 评论内容                     |
+| author          | Author       | 作者信息                     |
+| parentId        | String?      | 父评论 ID（用于回复）        |
+| parentUserName  | String?      | 父评论作者用户名             |
+| pinned          | bool         | 是否置顶                     |
+| replyCount      | int          | 直接回复数量                 |
+| totalReplyCount | int          | 总回复数（包括子孙回复）     |
+| createdAt       | DateTime     | 创建时间                     |
+| clientInfo      | ClientInfo?  | 客户端信息                   |
+| mark            | CommentMark? | 标记信息                     |
+| attachments     | List<Attachment>? | 附件列表                |
+| status          | String?      | 评论状态                     |
+| feedbackId      | String?      | 所属反馈 ID                  |
+
+### MainCommentWithReplies
+
+主评论及其回复（楼中楼模式）。
+
+| 字段        | 类型               | 说明           |
+| ----------- | ------------------ | -------------- |
+| id          | String             | 评论 ID        |
+| content     | String             | 评论内容       |
+| author      | Author             | 作者信息       |
+| createdAt   | DateTime           | 创建时间       |
+| mark        | CommentMark?       | 标记信息       |
+| status      | String?            | 评论状态       |
+| clientInfo  | ClientInfo?        | 客户端信息     |
+| attachments | List<Attachment>?  | 附件列表       |
+| replies     | PagedReplies       | 分页回复       |
+| pinned      | bool               | 是否置顶       |
+
+### PagedReplies
+
+分页回复响应。
+
+| 字段          | 类型           | 说明                  |
+| ------------- | -------------- | --------------------- |
+| content       | List<Comment>  | 回复列表              |
+| currentPage   | int            | 当前页码（从0开始）   |
+| totalPages    | int            | 总页数                |
+| totalElements | int            | 总元素数              |
+| hasNext       | bool           | 是否有下一页          |
+| hasPrevious   | bool           | 是否有上一页          |
 
 ### Author
 

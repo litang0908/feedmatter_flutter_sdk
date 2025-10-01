@@ -18,10 +18,14 @@ class Comment {
   final bool pinned;
   @JsonKey(defaultValue: 0)
   final int replyCount;
+  @JsonKey(defaultValue: 0)
+  final int totalReplyCount;
   final DateTime createdAt;
   final ClientInfo? clientInfo;
   final CommentMark? mark;
   final List<Attachment>? attachments;
+  final String? status;
+  final String? feedbackId;
 
   const Comment({
     required this.id,
@@ -31,10 +35,13 @@ class Comment {
     this.parentUserName,
     this.pinned = false,
     this.replyCount = 0,
+    this.totalReplyCount = 0,
     required this.createdAt,
     this.clientInfo,
     this.mark,
     this.attachments,
+    this.status,
+    this.feedbackId,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) => _$CommentFromJson(json);
