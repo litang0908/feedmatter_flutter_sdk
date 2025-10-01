@@ -15,6 +15,8 @@ import 'models/attachment.dart';
 import 'models/client_info.dart';
 import 'models/comment.dart';
 import 'models/feedback.dart';
+import 'models/main_comment_with_replies.dart';
+import 'models/paged_replies.dart';
 import 'models/project_config.dart';
 
 /// FeedMatter SDK 客户端
@@ -387,28 +389,61 @@ class FeedMatterClient {
         )).then((json) => Comment.fromJson(json));
   }
 
-  Future<List<Comment>> getComments(
+  /// 获取评论列表（楼中楼格式）
+  /// 
+  /// [feedbackId] 反馈ID
+  /// [page] 页码，从0开始
+  /// [size] 每页数量
+  /// [sort] 排序方式：
+  ///   - created_asc: 按创建时间升序（默认）
+  ///   - created_desc: 按创建时间降序
+  ///   - reply_desc: 按回复数降序
+  Future<List<MainCommentWithReplies>> getCommentsFloor(
     String feedbackId, {
     int page = 0,
     int size = 20,
-    String? sortBy,
+    String sort = 'created_asc',
   }) async {
     final response = await _handleResponse(() => _request(
           'GET',
-          '/api/v2/feedbacks/$feedbackId/comments',
+          '/api/v2/feedbacks/$feedbackId/comments/floor',
           queryParameters: {
             'page': page,
             'size': size,
-            if (sortBy != null) 'sort': sortBy,
+            'sort': sort,
           },
         ));
 
-    return (response as List).map((item) => Comment.fromJson(item)).toList();
+    return (response['content'] as List)
+        .map((item) => MainCommentWithReplies.fromJson(item))
+        .toList();
+  }
+
+  /// 获取主评论的回复列表（分页）
+  /// 
+  /// [mainCommentId] 主评论ID
+  /// [page] 页码，从0开始
+  /// [size] 每页数量
+  Future<PagedReplies> getCommentReplies(
+    String mainCommentId, {
+    int page = 0,
+    int size = 10,
+  }) async {
+    final response = await _handleResponse(() => _request(
+          'GET',
+          '/api/v2/feedbacks/comments/$mainCommentId/replies',
+          queryParameters: {
+            'page': page,
+            'size': size,
+          },
+        ));
+
+    return PagedReplies.fromJson(response);
   }
 
   /// 验证文件
-  void _validateFile(File file, {int maxSize = 10 * 1024 * 1024}) {
-    // 检查文件大小（默认最大10MB）
+  void _validateFile(File file, {int maxSize = 40 * 1024 * 1024}) {
+    // 检查文件大小（默认最大40MB）
     final size = file.lengthSync();
     if (size > maxSize) {
       throw FeedMatterApiException(

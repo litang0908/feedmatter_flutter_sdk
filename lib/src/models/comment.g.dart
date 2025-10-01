@@ -14,6 +14,7 @@ Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
       parentUserName: json['parentUserName'] as String?,
       pinned: json['pinned'] as bool? ?? false,
       replyCount: (json['replyCount'] as num?)?.toInt() ?? 0,
+      totalReplyCount: (json['totalReplyCount'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
       clientInfo: json['clientInfo'] == null
           ? null
@@ -24,6 +25,8 @@ Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
       attachments: (json['attachments'] as List<dynamic>?)
           ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
           .toList(),
+      status: json['status'] as String?,
+      feedbackId: json['feedbackId'] as String?,
     );
 
 Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
@@ -34,8 +37,11 @@ Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
       'parentUserName': instance.parentUserName,
       'pinned': instance.pinned,
       'replyCount': instance.replyCount,
+      'totalReplyCount': instance.totalReplyCount,
       'createdAt': instance.createdAt.toIso8601String(),
       'clientInfo': instance.clientInfo,
       'mark': instance.mark,
       'attachments': instance.attachments,
+      'status': instance.status,
+      'feedbackId': instance.feedbackId,
     };
