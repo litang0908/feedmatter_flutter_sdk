@@ -14,6 +14,8 @@ class Comment {
   final Author author;
   final String? parentId;
   final String? parentUserName;
+  final String? parentUserId;
+  final String? rootCommentId;
   @JsonKey(name: 'pinned', defaultValue: false)
   final bool pinned;
   @JsonKey(defaultValue: 0)
@@ -33,6 +35,8 @@ class Comment {
     required this.author,
     this.parentId,
     this.parentUserName,
+    this.parentUserId,
+    this.rootCommentId,
     this.pinned = false,
     this.replyCount = 0,
     this.totalReplyCount = 0,

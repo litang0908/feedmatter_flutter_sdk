@@ -1,3 +1,12 @@
+## 1.1.1
+
+### 改进
+
+* 📝 更新 `Comment` 模型，添加新字段：
+  * `parentUserId`: 通过 UUID 精确标识被回复的用户
+  * `rootCommentId`: 标记子评论所属的一级评论ID，方便App端组装楼中楼结构
+  * 向后兼容，保留原有的 `parentUserName` 字段
+
 ## 1.1.0
 
 ### 新功能
