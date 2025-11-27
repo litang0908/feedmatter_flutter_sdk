@@ -15,6 +15,7 @@ import 'models/client_info.dart';
 import 'models/comment.dart';
 import 'models/feedback.dart';
 import 'models/main_comment_with_replies.dart';
+import 'models/page.dart';
 import 'models/paged_replies.dart';
 import 'models/project_config.dart';
 
@@ -383,15 +384,14 @@ class FeedMatterClient {
   }
 
   /// 获取评论列表（楼中楼格式）
-  /// 
+  ///
   /// [feedbackId] 反馈ID
   /// [page] 页码，从0开始
   /// [size] 每页数量
-  /// [sort] 排序方式：
-  ///   - created_asc: 按创建时间升序（默认）
-  ///   - created_desc: 按创建时间降序
-  ///   - reply_desc: 按回复数降序
-  Future<List<MainCommentWithReplies>> getCommentsFloor(
+  /// [sort] 排序方式：created_asc(默认)、created_desc、reply_desc
+  ///
+  /// 返回分页结果，包含评论列表和分页信息
+  Future<Page<MainCommentWithReplies>> getCommentsFloor(
     String feedbackId, {
     int page = 0,
     int size = 20,
@@ -407,13 +407,14 @@ class FeedMatterClient {
           },
         ));
 
-    return (response['content'] as List)
-        .map((item) => MainCommentWithReplies.fromJson(item))
-        .toList();
+    return Page.fromJson(
+      response,
+      (json) => MainCommentWithReplies.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   /// 获取主评论的回复列表（分页）
-  /// 
+  ///
   /// [mainCommentId] 主评论ID
   /// [page] 页码，从0开始
   /// [size] 每页数量
